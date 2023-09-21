@@ -1,19 +1,7 @@
 #include "SENSOR.h"
 
 bool senClass::update() {
-
-//   if (sen.updated) {
-//     sen.updated = false;
-//     position = sen.position;
-//     speed = sen.speed;
-//     attitude = sen.attitude;
-//     baro = sen.baro;
-//     gpsMainStatus = sen.gpsMainStatus;
-//     time = sen.time;
-//     course = sen.course;
-//     valid = sen.valid; 
-//     return true;
-//   }
+// Collect data from all sensors and return true if some data has been updated
   return false;
 }
 

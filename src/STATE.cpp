@@ -191,6 +191,7 @@ FLIGHTMODE uav::igniter() {
   if (timeDiff(sys.get().time, sys.get().timeTransition) >= IGNITER_COUNTER) {
     flightModeOut = FLIGHTMODE::IGNITION_MODE;
   }
+  return flightModeOut;
 }
 
 // Fuel and Oxydizer valves are partially opened.
@@ -202,6 +203,7 @@ FLIGHTMODE uav::ignition() {
   if (timeDiff(sys.get().time,sys.get().timeTransition) >= IGNITION_COUNTER) {
     flightModeOut = FLIGHTMODE::THRUST_MODE;
   }
+  return flightModeOut;
 }
 
 // Fuel and Oxydizer valves are fully opened.
@@ -213,6 +215,7 @@ FLIGHTMODE uav::thrust() {
   if (timeDiff(sys.get().time,sys.get().timeTransition) >= THRUST_COUNTER) {
     flightModeOut = FLIGHTMODE::SHUTDOWN_MODE;
   }
+  return flightModeOut;
 }
 
 
@@ -225,6 +228,7 @@ FLIGHTMODE uav::shutdown() {
   if (timeDiff(sys.get().time,sys.get().timeTransition) >= SHUTDOWN_COUNTER) {
     flightModeOut = FLIGHTMODE::ASCENT_MODE;
   }
+  return flightModeOut;
 }
 
 // Ascent mode, if Z speed is lower than VUP go back to readysteady mode, if we reach the separation altitude, separate.
@@ -241,7 +245,6 @@ FLIGHTMODE uav::flightAscent() {
   if (data.get().sen.speed.z < VDOWN) {
     flightModeOut = FLIGHTMODE::DESCENT_MODE;
   }
-
   return flightModeOut;
 }
 
@@ -383,7 +386,7 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
 
     case CMD_ID::ARMED:
     {
-      if (flightModeIn == READYSTEADY_MODE) {
+      if (flightModeIn == FLIGHTMODE::READYSTEADY_MODE) {
         flightModeOut = FLIGHTMODE::ARMED_MODE;
       }
       else {
@@ -394,7 +397,7 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
 
     case CMD_ID::PRESSURISED:
     {
-      if (flightModeIn == ARMED) {
+      if (flightModeIn == FLIGHTMODE::ARMED_MODE) {
         flightModeOut = FLIGHTMODE::PRESSURED_MODE;
       }
       else {
@@ -405,7 +408,7 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
 
     case CMD_ID::IGNITION:
     {
-      if (flightModeIn == PRESSURED_MODE) {
+      if (flightModeIn == FLIGHTMODE::PRESSURED_MODE) {
         flightModeOut = FLIGHTMODE::IGNITER_MODE;
       }
       else {
