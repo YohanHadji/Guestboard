@@ -1,8 +1,5 @@
 #include "SENSOR.h"
 
-// static senStatus sen;
-
-
 bool senClass::update() {
 
 //   if (sen.updated) {
@@ -71,6 +68,8 @@ senStatus senClass::get() {
 
     senOut.baro = baro.get();
     senOut.prop = prop.get();
+
+    senOut.msSinceMidnight = msSinceMidnight;
 
     return senOut;
 }

@@ -6,7 +6,7 @@ static bool newCmdReceived = false;
 comClass::comClass()
 { 
   lastPacket.cmdId = DEFAULT;
-  lastPacket.cmdValue = INACTIVE;
+  lastPacket.cmdValue = 0x00;
 }
 
 void comClass::update() {
@@ -103,6 +103,18 @@ comStatus comClass::get() {
   com.cmdValue = cmdValue;
   return com;
 };
+
+void comClass::sendTelemetry(uint8_t packetId, uint8_t *data, uint32_t len) {
+
+  uint8_t *codedBuffer = LoRaCapsuleDownlink.encode(packetId, data, len);
+  size_t codedLen = LoRaCapsuleDownlink.getCodedLen(len);
+
+  LoRaDownlink.beginPacket();
+  LoRaDownlink.write(codedBuffer, codedLen);
+  LoRaDownlink.endPacket();
+
+  delete[] codedBuffer;
+}
 
 bool comClass::isUpdated() {
   if (newCmdReceived) {

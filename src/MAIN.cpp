@@ -5,7 +5,7 @@
 // This is the list of data that we want to save on the SD card, for more details, check DATA.c, print() function
 dataListString list1[] = {DATE_TIME, TIME_CODE, BAT_VALUES, FLIGHT_MODE, SEN_HEALTH, 
                           POSITION_VALUES, ATTITUDE_VALUES, SPEED_VALUES, COURSE, TEMPERATURE, PRESSURE, 
-                          MIX_VALUES, OUTPUT_VALUES}; 
+                          OUTPUT_VALUES}; 
                           
 int len = sizeof(list1)/sizeof(list1[0]);
 

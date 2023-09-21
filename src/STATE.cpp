@@ -26,7 +26,13 @@ void uav::compute() {
 void uav::output() {
   sys.out.write();
   // Data save is run in last because it is the most time consuming function and we have 50ms before the next sensor packet.
-  data.save(sys.get());
+  static timeCode lastSave;
+  if (HIGH_RATE) {
+    if (timeDiff(sys.get().time, lastSave) >= 1.0/HIGH_RATE_RATE) {
+      data.save(sys.get());
+      lastSave = sys.get().time;
+    }
+  }
 }
 
 void uav::update() {
@@ -182,7 +188,7 @@ FLIGHTMODE uav::igniter() {
   FLIGHTMODE flightModeOut;
   flightModeOut = FLIGHTMODE::IGNITER_MODE;
 
-  if (timeDiff(sys.get().timeTransition,sys.get().time) >= IGNITER_COUNTER*1000.0) {
+  if (timeDiff(sys.get().time, sys.get().timeTransition) >= IGNITER_COUNTER) {
     flightModeOut = FLIGHTMODE::IGNITION_MODE;
   }
 }
@@ -193,7 +199,7 @@ FLIGHTMODE uav::ignition() {
   FLIGHTMODE flightModeOut;
   flightModeOut = FLIGHTMODE::IGNITION_MODE;
 
-  if (timeDiff(sys.get().timeTransition,sys.get().time) >= IGNITION_COUNTER*1000.0) {
+  if (timeDiff(sys.get().time,sys.get().timeTransition) >= IGNITION_COUNTER) {
     flightModeOut = FLIGHTMODE::THRUST_MODE;
   }
 }
@@ -204,7 +210,7 @@ FLIGHTMODE uav::thrust() {
   FLIGHTMODE flightModeOut;
   flightModeOut = FLIGHTMODE::THRUST_MODE;
 
-  if (timeDiff(sys.get().timeTransition,sys.get().time) >= THRUST_COUNTER*1000.0) {
+  if (timeDiff(sys.get().time,sys.get().timeTransition) >= THRUST_COUNTER) {
     flightModeOut = FLIGHTMODE::SHUTDOWN_MODE;
   }
 }
@@ -216,7 +222,7 @@ FLIGHTMODE uav::shutdown() {
   FLIGHTMODE flightModeOut;
   flightModeOut = FLIGHTMODE::SHUTDOWN_MODE;
 
-  if (timeDiff(sys.get().timeTransition,sys.get().time) >= SHUTDOWN_COUNTER*1000.0) {
+  if (timeDiff(sys.get().time,sys.get().timeTransition) >= SHUTDOWN_COUNTER) {
     flightModeOut = FLIGHTMODE::ASCENT_MODE;
   }
 }
@@ -315,11 +321,11 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
-      if (com.cmdValue == ACTIVE) {
-        currentMix.solenoid1 = SOLENOID1_OPEN;
+      if (com.cmdValue == OPEN) {
+        currentMix.servoFuel = SERVO_FUEL_OPEN;
       }
-      else if (com.cmdValue == INACTIVE) {
-        currentMix.solenoid1 = !SOLENOID1_OPEN;
+      else if (com.cmdValue == CLOSED) {
+        currentMix.servoFuel = SERVO_FUEL_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
     }
@@ -329,11 +335,11 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
-      if (com.cmdValue == ACTIVE) {
-        currentMix.solenoid2 = SOLENOID2_OPEN;
+      if (com.cmdValue == OPEN) {
+        currentMix.servoN2O = SERVO_N2O_OPEN;
       }
-      else if (com.cmdValue == INACTIVE) {
-        currentMix.solenoid2 = !SOLENOID2_OPEN;
+      else if (com.cmdValue == CLOSED) {
+        currentMix.servoN2O = SERVO_N2O_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
     }
@@ -343,11 +349,11 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
-      if (com.cmdValue == ACTIVE) {
-        currentMix.solenoid3 = SOLENOID3_OPEN;
+      if (com.cmdValue == OPEN) {
+        currentMix.ventFuel = VENT_FUEL_OPEN;
       }
-      else if (com.cmdValue == INACTIVE) {
-        currentMix.solenoid3 = !SOLENOID3_OPEN;
+      else if (com.cmdValue == CLOSED) {
+        currentMix.ventFuel = VENT_FUEL_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
     }
@@ -357,11 +363,11 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
-      if (com.cmdValue == ACTIVE) {
-        currentMix.solenoid4 = SOLENOID4_OPEN;
+      if (com.cmdValue == OPEN) {
+        currentMix.ventN2O = VENT_N2O_OPEN;
       }
-      else if (com.cmdValue == INACTIVE) {
-        currentMix.solenoid4 = !SOLENOID4_OPEN;
+      else if (com.cmdValue == CLOSED) {
+        currentMix.ventN2O = VENT_N2O_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
     }

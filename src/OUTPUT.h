@@ -3,26 +3,27 @@
 
 #include "Arduino.h"
 #include "CONFIG.h"
+#include "PWMServo.h"
 
 // Contains the informations send to the servo motor
 struct outStatus {
-  bool solenoid1;
-  bool solenoid2;
-  bool solenoid3;
+  bool ventN2O;
+  bool ventFuel;
+  bool pressurizer;
   bool solenoid4;
-  bool servo1;
-  bool servo2;
+  unsigned servoN2O;
+  unsigned servoFuel;
   bool ignitor;
   bool buzzer;
 };
 
 struct mixStatus {
-  bool solenoid1;
-  bool solenoid2;
-  bool solenoid3;
+  bool ventN2O;
+  bool ventFuel;
+  bool pressurizer;
   bool solenoid4;
-  bool servo1;
-  bool servo2;
+  unsigned servoN2O;
+  unsigned servoFuel;
   bool ignitor;
   bool buzzer;
 };
@@ -34,6 +35,16 @@ class outClass {
     outStatus get();
     outStatus compute(mixStatus);
   private:
+    PWMServo PWMServoN2O;
+    PWMServo PWMServoFuel;
+    bool ventN2O;
+    bool ventFuel;
+    bool pressurizer;
+    bool solenoid4;
+    unsigned servoN2O;
+    unsigned servoFuel;
+    bool ignitor;
+    bool buzzer;
 };
 
 

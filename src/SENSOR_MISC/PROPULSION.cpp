@@ -9,18 +9,19 @@ void proClass::begin() {
 }
 
 void proClass::read() {
-    MCP3427::ADCGain gain = MCP3427::GAIN_8X;
+    MCP3427::ADCGain gain = MCP3427::GAIN_1X;
     MCP3427::ADCBitDepth bitDepth = MCP3427::ADC_12_BITS;
 
-    pressure1 = adc.analogRead(0, gain, bitDepth);
-    pressure2 = adc.analogRead(1, gain, bitDepth);
-    temperature1 = adc.analogRead(2, gain, bitDepth);
+    pressureN2O = adc.analogRead(0, gain, bitDepth);
+    pressureFuel = adc.analogRead(1, gain, bitDepth);
+    pressureChamber = adc.analogRead(2, gain, bitDepth);
+    temperatureN2O = adc.analogRead(3, gain, bitDepth);
 }
 
 proStatus proClass::get() {
     proStatus status;
-    status.pressure1 = pressure1;
-    status.pressure2 = pressure2;
-    status.temperature1 = temperature1;
+    status.pressureFuel = pressureFuel;
+    status.pressureChamber = pressureChamber;
+    status.temperatureN2O = temperatureN2O;
     return status;
 }

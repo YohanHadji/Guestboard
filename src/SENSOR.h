@@ -74,13 +74,14 @@ struct senStatus {
 
   bool valid;
   bool updated;
+  unsigned age;
 
   gpsStatus gpsMainStatus;
   gpsStatus gpsAuxStatus;
   barStatus baro;
   proStatus prop;
 
-  elapsedMillis msSinceMidnight;
+  unsigned msSinceMidnight;
 };
 
 double timeDiff(timeCode time1, timeCode time2);
@@ -110,12 +111,15 @@ class senClass {
     double course;
     bool updated;
     bool valid;
+    unsigned age;
 
     // RAW SENSOR VALUES // 
     barClass baro;
     proClass prop;
     TinyGPSPlus gpsMain;
     TinyGPSPlus gpsAux;
+
+    elapsedMillis msSinceMidnight;
 };
 
 

@@ -45,12 +45,12 @@ class mixClass {
     mixStatus compute(sysStatus);
     mixStatus mixManualMemory;
   private: 
-    bool solenoid1;
-    bool solenoid2;
-    bool solenoid3;
+    bool ventN2O;
+    bool ventFuel;
+    bool pressurizer;
     bool solenoid4;
-    bool servo1;
-    bool servo2;
+    unsigned servoN2O;
+    unsigned servoFuel;
     bool ignitor;
     bool buzzer;
     mixStatus mixInit(sysStatus);

@@ -10,7 +10,10 @@
 #define TLM_MAIN        true  // Send telemetry on main telem port 
 #define TLM_MAIN_RATE       0.25    // Rate of telemetry sent to radiosonde (in Hz)
 
-#define LOW_RATE        true  // Additional low rate saving on a second file 
+#define HIGH_RATE       true    // High rate datalogging 
+#define HIGH_RATE_RATE  20.0    // Rate of high rate saving (in Hz)
+
+#define LOW_RATE        true    // Additional low rate saving on a second file 
 #define LOW_RATE_RATE   1.0     // Rate of low rate saving (in Hz)
 
 #define DEP_MODE            1    // If 0 = Timer, 1 = Timer AND Altitude used to deploy. So will wait minimum X seconds and then will wait for good altitude.
@@ -38,13 +41,15 @@
 #define PROPSENSOR_I2C_ADDR 0x68
 
 // MISC WIRING 
-#define SOLENOID_1_PIN  1
-#define SOLENOID_2_PIN  2
-#define SOLENOID_3_PIN  3
+#define VENT_N2O_PIN    1
+#define VENT_FUEL_PIN   2    
+#define PRESSURIZER_PIN 3
 #define SOLENOID_4_PIN  4
-#define SERVO_1_PIN     5
-#define SERVO_2_PIN     6
-#define INGNITOR_PIN    7
+
+#define SERVO_N2O_PIN       5
+#define SERVO_FUEL_PIN      6
+
+#define IGNITOR_PIN    7
 #define BUZZER_PIN      8
 
 #define BAT_PIN        A0
@@ -52,21 +57,41 @@
 #define LED_A_PIN     3 
 #define LED_B_PIN     4
 
+// LOGIC LEVELS 
+#define VENT_N2O_OPEN       HIGH
+#define VENT_N2O_CLOSED     LOW
+
+#define VENT_FUEL_OPEN      HIGH
+#define VENT_FUEL_CLOSED    LOW
+
+#define PRESSURIZER_OPEN    HIGH
+#define PRESSURIZER_CLOSED  LOW
+
+#define SOLENOID4_OPEN      HIGH
+#define SOLENOID4_CLOSED    LOW
+
+#define IGNITOR_ACTIVE      HIGH
+
+#define BUZZER_ACTIVE       HIGH
+
+#define SERVO_N2O_CLOSED    700
+#define SERVO_N2O_STEP_1    1268
+#define SERVO_N2O_STEP_2    1500
+#define SERVO_N2O_OPEN      2300
+
+#define SERVO_FUEL_CLOSED   700
+#define SERVO_FUEL_STEP_1   1357
+#define SERVO_FUEL_STEP_2   1535
+#define SERVO_FUEL_OPEN     2300
+
 // PROPULSION TIMING
-#define IGNITER_COUNTER     1.0
-#define IGNITION_COUNTER    1.0
+#define IGNITER_COUNTER     4.25
+#define IGNITION_COUNTER    1.615
 #define THRUST_COUNTER      1.0
 #define SHUTDOWN_COUNTER    1.0
 
-// LOGIC LEVELS 
-#define SOLENOID1_OPEN  HIGH
-#define SOLENOID2_OPEN  HIGH
-#define SOLENOID3_OPEN  HIGH
-#define SOLENOID4_OPEN  HIGH
-#define SERVO1_OPEN     HIGH
-#define SERVO2_OPEN     HIGH
-#define IGNITOR_ACTIVE  HIGH
-#define BUZZER_ACTIVE   HIGH
+#define STEP1_DELAY_MS      265
+#define STEP2_DELAY_MS      350
 
 // LORA WIRING & SETTINGS 
 #define LORA_UPLINK_FREQ         UPLINK_FREQUENCY

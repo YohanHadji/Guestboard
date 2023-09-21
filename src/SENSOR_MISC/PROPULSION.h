@@ -6,9 +6,10 @@
 #include "MCP3427.h"
 
 struct proStatus {
-    unsigned pressure1;
-    unsigned pressure2;
-    unsigned temperature1;
+    uint16_t pressureN2O;
+    uint16_t pressureFuel;
+    uint16_t pressureChamber;
+    float_t temperatureN2O;
 };
 
 class proClass {
@@ -19,9 +20,10 @@ class proClass {
         proStatus get();
     private:
         MCP3427 adc;
-        unsigned pressure1;
-        unsigned pressure2;
-        unsigned temperature1;
+        unsigned pressureN2O;
+        unsigned pressureFuel;
+        unsigned pressureChamber;
+        unsigned temperatureN2O;
 };
 
 

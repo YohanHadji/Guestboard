@@ -37,25 +37,62 @@ bool dataClass::update() {
 }
 
 void dataClass::send(sysStatus sysIn) {
-  // TelemetryPacket packet;
 
-  // senStatus senData = sen.get();
+  senStatus senIn;
+  senIn = sen.get();
 
-  // packet.timeSecond = senData.time.code.second;
-  // packet.flightMode = sysIn.flightMode; 
+  PacketAVDownlink packetToSend;
 
-  // size_t size = sizeof(packet); // Get the size of the struct in bytes
-  // byte* buffer = new byte[size]; // Allocate memory for the byte array
-  // memcpy(buffer, &packet, size); // Copy the struct to the byte array
+  packetToSend.timestamp = senIn.msSinceMidnight;
+  packetToSend.flightMode = sysIn.flightMode;
 
-  // size_t codedSize = cmd.telemetryRadio.getCodedLen(size);
-  // byte packetId = 0x00;
-  // byte* codedBuffer = cmd.telemetryRadio.encode(packetId, buffer, size);
+  packetToSend.lat = senIn.position.lat;
+  packetToSend.lng = senIn.position.lng;
+  packetToSend.alt = senIn.position.alt;
 
-  // TLM_PORT.write(codedBuffer, codedSize);
+  packetToSend.positionAge = senIn.age;
 
-  // delete[] buffer; // Don't forget to deallocate the memory when you're done
-  // delete[] codedBuffer;
+  packetToSend.engineStatus.pressureN2O = senIn.prop.pressureN2O;
+  packetToSend.engineStatus.pressureFuel = senIn.prop.pressureFuel;
+  packetToSend.engineStatus.pressureChamber = senIn.prop.pressureChamber;
+  packetToSend.engineStatus.temperatureN2O = senIn.prop.temperatureN2O;
+
+  if (sysIn.out.ventN2O == VENT_N2O_OPEN) {
+    packetToSend.engineStatus.solenoidVentN2O = OPEN;
+  }
+  else {
+    packetToSend.engineStatus.solenoidVentN2O = CLOSED;
+  }
+
+  if (sysIn.out.ventFuel == VENT_FUEL_OPEN) {
+    packetToSend.engineStatus.solenoidVentFuel = OPEN;
+  }
+  else {
+    packetToSend.engineStatus.solenoidVentFuel = CLOSED;
+  }
+
+  if (sysIn.out.pressurizer == PRESSURIZER_OPEN) {
+    packetToSend.engineStatus.solenoidPressure = OPEN;
+  }
+  else {
+    packetToSend.engineStatus.solenoidPressure = CLOSED;
+  }
+
+  if (sysIn.out.servoN2O == SERVO_N2O_OPEN) {
+    packetToSend.engineStatus.servoN2O = OPEN;
+  }
+  else {
+    packetToSend.engineStatus.servoN2O = CLOSED;
+  }
+
+  if (sysIn.out.servoFuel == SERVO_FUEL_OPEN) {
+    packetToSend.engineStatus.servoFuel = OPEN;
+  }
+  else {
+    packetToSend.engineStatus.servoFuel = CLOSED;
+  }
+
+  com.sendTelemetry(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packetToSend, sizeof(packetToSend));
 }
 
 void dataClass::save(sysStatus sysIn) {
@@ -304,16 +341,24 @@ String dataClass::print(sysStatus sysIn) {
         }
       break;
       case MIX_VALUES:
-        output += String(sysIn.mix.solenoid1) + ",";
-        output += String(sysIn.mix.solenoid2) + ",";
-        output += String(sysIn.mix.solenoid3) + ",";
+        output += String(sysIn.mix.ventN2O) + ",";
+        output += String(sysIn.mix.ventFuel) + ",";
+        output += String(sysIn.mix.pressurizer) + ",";
         output += String(sysIn.mix.solenoid4) + ",";
-        output += String(sysIn.mix.servo1) + ",";
-        output += String(sysIn.mix.servo2) + ",";
+        output += String(sysIn.mix.servoN2O) + ",";
+        output += String(sysIn.mix.servoFuel) + ",";
         output += String(sysIn.mix.ignitor) + ",";
         output += String(sysIn.mix.buzzer);
       break;
       case OUTPUT_VALUES:
+        output += String(sysIn.out.ventN2O) + ",";
+        output += String(sysIn.out.ventFuel) + ",";
+        output += String(sysIn.out.pressurizer) + ",";
+        output += String(sysIn.out.solenoid4) + ",";
+        output += String(sysIn.out.servoN2O) + ",";
+        output += String(sysIn.out.servoFuel) + ",";
+        output += String(sysIn.out.ignitor) + ",";
+        output += String(sysIn.out.buzzer);
       break;
       case BAT_VALUES:
         output += String(bat.get().voltage) + ",";
