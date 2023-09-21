@@ -2,7 +2,60 @@
 
 bool senClass::update() {
 // Collect data from all sensors and return true if some data has been updated
-  return false;
+
+    while(GPS_MAIN_PORT.available()) {
+        gpsMain.encode(GPS_MAIN_PORT.read());
+    }
+
+    while(GPS_AUX_PORT.available()) {
+        gpsAux.encode(GPS_AUX_PORT.read());
+    }
+
+    bool positionUpdated = false;
+    if (gpsMain.location.isUpdated() or gpsAux.location.isUpdated()) {
+        positionUpdated = true;
+        if (gpsMain.location.isValid()) {
+            position.lat = gpsMain.location.lat();
+            position.lng = gpsMain.location.lng();
+            position.alt = gpsMain.altitude.meters();
+            msSinceMidnight = gpsMain.time.value()*10.0+gpsMain.time.age();
+            time.isValid = gpsMain.time.isValid();
+            // gps.fixType = gpsMain.fixType();
+            gps.hdop = gpsMain.hdop.value();
+            gps.satNumber= gpsMain.satellites.value();
+            gps.isValid = gpsMain.location.isValid();
+        }
+        else if (gpsAux.location.isValid()) {
+            position.lat = gpsAux.location.lat();
+            position.lng = gpsAux.location.lng();
+            position.alt = gpsAux.altitude.meters();
+            msSinceMidnight = gpsAux.time.value()*10.0+gpsAux.time.age();
+            time.isValid = gpsAux.time.isValid();
+            // gps.fixType = gpsAux.fixType();
+            gps.hdop = gpsAux.hdop.value();
+            gps.satNumber= gpsAux.satellites.value();
+            gps.isValid = gpsAux.location.isValid();
+        }
+    }
+
+    static unsigned long lastUpdate = 0;
+    if (((millis() - lastUpdate) >= 1.0/SENSOR_UPDATE_RATE) or positionUpdated) {
+        lastUpdate = millis();
+
+        positionUpdated = false;
+        time.hour = msSinceMidnight/36000000;
+        time.minute = (msSinceMidnight%36000000)/600000;
+        time.second = ((msSinceMidnight%36000000)%600000)/10000;
+        time.nanosecond = (((msSinceMidnight%36000000)%600000)%10000)*100000;
+        time.code.second = time.second;
+        time.code.nanosecond = time.nanosecond;
+
+        baro.read();
+        prop.read();
+        return true;
+    }
+
+    return false;
 }
 
 

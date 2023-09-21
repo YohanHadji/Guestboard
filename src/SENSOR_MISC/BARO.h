@@ -14,7 +14,7 @@ class barClass {
     public:
         barClass();
         void begin();
-        void update();
+        void read();
         barStatus get();
     private:
         double temperature;
