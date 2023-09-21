@@ -185,6 +185,29 @@ mixStatus mixClass::mixShutdown(sysStatus sysIn) {
   return mixOut;
 }
 
+mixStatus mixClass::mixFlightAscent(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  
+  return mixOut;
+}
+
+mixStatus mixClass::mixFlightDescent(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+
+  return mixOut;
+}
+
+mixStatus mixClass::mixFlightGliding(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+
+  return mixOut;
+}
+
+mixStatus mixClass::mixAbort(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  return mixOut;
+}
+
 void mixClass::setManualMemory(mixStatus mixIn) {
   mixManualMemory = mixIn;
 }
