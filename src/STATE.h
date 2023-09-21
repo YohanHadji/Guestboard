@@ -20,13 +20,6 @@ class uav {
     FLIGHTMODE flightAscent();
     FLIGHTMODE flightDescent();
     FLIGHTMODE flightGliding();
-    FLIGHTMODE flightGlidingAuto();
-    FLIGHTMODE flightSpiral();
-    FLIGHTMODE flightGlidingRecover();
-    FLIGHTMODE flightGlidingNoGPS();
-    FLIGHTMODE abort();
-    FLIGHTMODE configError();
-    FLIGHTMODE flyByWire();
 
     dataClass data;
     sysClass  sys;
@@ -34,8 +27,6 @@ class uav {
   private:
     buzzerClass buzzer;
     ledClass    led;
-    ERRORCODE checkConfig();
-    bool isAutonomous();
     FLIGHTMODE executeCmd(FLIGHTMODE, cmdStatus);
 };
 

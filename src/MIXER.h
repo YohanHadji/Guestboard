@@ -15,16 +15,6 @@ enum FLIGHTMODE {
   GLIDING
 };
 
-enum ERRORCODE {
-  NOERROR = 0,
-  NOWINDFILE,
-  NOWAYPOINTFILE,
-  WAYPOINTRANGE,
-  POSRANGE,
-  TIMERANGE,
-  TIMEWAIT
-};
-
 struct sysStatus {
   timeCode time;
   timeCode timeTransition;
@@ -44,10 +34,14 @@ class mixClass {
     mixStatus get();
     mixStatus compute(sysStatus);
   private: 
-    double acc;
-    double dir;
-    double dep;
-    double brk;
+    bool solenoid1;
+    bool solenoid2;
+    bool solenoid3;
+    bool solenoid4;
+    bool servo1;
+    bool servo2;
+    bool ignitor;
+    bool buzzer;
     mixStatus mixInit(sysStatus);
 };
 

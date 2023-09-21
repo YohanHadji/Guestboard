@@ -5,9 +5,6 @@
 #include "CONFIG.h"
 #include <Adafruit_NeoPixel.h>
 
-//all the buzzer state we will need 
-enum typeBeeping {lowFrequency = 1, longLowFrequency, highFrequency, longHighFrequency};
-
 struct rgbColor {
     int r;
     int g;
@@ -30,13 +27,7 @@ class buzzerClass {
     public:
     buzzerClass();
     void update();
-    void buzzerTurnOn();
-    void buzzerInit();
-    void buzzerInitEnd();
-    void buzzerChangeFlightMode();
-    void buzzerBeep(typeBeeping type);
-    void beep();
-
+    
     private:
     int buzzerPin;
     unsigned int duration, frequency, durationOff;

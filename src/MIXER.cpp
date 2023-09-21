@@ -38,12 +38,15 @@ mixClass::mixClass()
 
 mixStatus mixClass::get() {
   mixStatus mixOut;
-  mixOut.dir = dir;
-  mixOut.brk = brk;
-  mixOut.acc = acc;
-  mixOut.dep = dep;
+  mixOut.solenoid1 = solenoid1;
+  mixOut.solenoid2 = solenoid2;
+  mixOut.solenoid3 = solenoid3;
+  mixOut.solenoid4 = solenoid4;
+  mixOut.servo1 = servo1;
+  mixOut.servo2 = servo2;
+  mixOut.ignitor = ignitor;
+  mixOut.buzzer = buzzer;
   return mixOut;
-  //return {acc, dir, dep};
 }
 
 // Return the command that matches the current flight mode
@@ -57,18 +60,20 @@ mixStatus mixClass::compute(sysStatus sysIn) {
       mixOut = mixInit(sysIn);
     break;
   }
-  dir = mixOut.dir;
-  brk = mixOut.brk;
-  acc = mixOut.acc;
-  dep = mixOut.dep;
+  solenoid1 = mixOut.solenoid1;
+  solenoid2 = mixOut.solenoid2;
+  solenoid3 = mixOut.solenoid3;
+  solenoid4 = mixOut.solenoid4;
+  servo1 = mixOut.servo1;
+  servo2 = mixOut.servo2;
+  ignitor = mixOut.ignitor;
+  buzzer = mixOut.buzzer;
   return mixOut;
 }
 
 // The system is on ground
 mixStatus mixClass::mixInit(sysStatus sysIn) {
-  mixStatus mixOut({0, 0, 0, 0});
-  if (sysIn.separated) {
-  }
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
   return mixOut;
 }
 

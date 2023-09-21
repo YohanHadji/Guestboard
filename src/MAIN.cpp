@@ -1,15 +1,15 @@
-#include "STATE.h"
 #include "Arduino.h"
+#include "STATE.h"
 #include "CONFIG.h"
 
 // This is the list of data that we want to save on the SD card, for more details, check DATA.c, print() function
 dataListString list1[] = {DATE_TIME, TIME_CODE, BAT_VALUES, FLIGHT_MODE, SEN_HEALTH, 
                           POSITION_VALUES, ATTITUDE_VALUES, SPEED_VALUES, COURSE, TEMPERATURE, PRESSURE, 
-                          VDOWN_VALUE, MIX_VALUES, OUTPUT_VALUES}; 
+                          MIX_VALUES, OUTPUT_VALUES}; 
                           
 int len = sizeof(list1)/sizeof(list1[0]);
 
-// uav, r2home is the main object of the code, everything is stored in this object. 
+// uav, nordend is the main object of the code, everything is stored in this object. 
 static uav nordend(list1, len);
 const int chipSelect = BUILTIN_SDCARD;
 

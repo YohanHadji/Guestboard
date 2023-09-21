@@ -6,17 +6,25 @@
 
 // Contains the informations send to the servo motor
 struct outStatus {
-  int l;
-  int r;
-  int x1;
-  int x2;
+  bool solenoid1;
+  bool solenoid2;
+  bool solenoid3;
+  bool solenoid4;
+  bool servo1;
+  bool servo2;
+  bool ignitor;
+  bool buzzer;
 };
 
 struct mixStatus {
-  double dir;
-  double brk;
-  double acc;
-  double dep;
+  bool solenoid1;
+  bool solenoid2;
+  bool solenoid3;
+  bool solenoid4;
+  bool servo1;
+  bool servo2;
+  bool ignitor;
+  bool buzzer;
 };
 
 class outClass {

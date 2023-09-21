@@ -1,7 +1,5 @@
 #include "STATE.h"
 
-static int buzzerCooldown(1000);
-
 uav::uav(dataListString listIn[30], int len)
   :data(listIn,len)  
 { 
@@ -17,12 +15,7 @@ void uav::compute() {
   sys.setTime(data.sen.get().time.code);
   sys.setFlightMode(newFlightMode);
 
-  // We only run the navigation if we are initialised because we need correct GPS coordinates. 
-  if (sys.get().initialised) { // and sys.get().flightMode != READYSTEADY, removed, I think it was a mistake to have it here.
-    double localAltitude  = data.sen.get().position.alt;
-  }
-
-  // However, we always output the servo signal have them in the idle position even if we are not initialised
+  // We always output the output signal have them in the idle position even if we are not initialised
   sys.out.compute(sys.mix.compute(sys.get()));
 
   if (newFlightMode != oldFlightMode) {
@@ -79,7 +72,6 @@ FLIGHTMODE uav::flightState() {
   }
 
   if (flightModeOut != flightModeIn) {
-    buzzer.buzzerChangeFlightMode();
     // Transition time is used all over the programm to know exactly when we did the last mode transition
     sys.setTransitionTime(sys.get().time);
   }
@@ -93,15 +85,7 @@ FLIGHTMODE uav::flightInit() {
 
   FLIGHTMODE flightModeOut;
   flightModeOut = INITIALIZE;
-  
-  if(buzzerCooldown >= 100) {
-    buzzer.buzzerInit();
-    buzzerCooldown = 0;
-  } 
-  else {
-    ++buzzerCooldown;
-  }
-  
+
   if (data.get().sen.valid) {
     if (!sys.isInitialised()) {
       sys.setFlightMode(READYSTEADY);
@@ -110,7 +94,6 @@ FLIGHTMODE uav::flightInit() {
       flightModeOut = READYSTEADY;
     }
     sys.setReady();
-    buzzer.buzzerInitEnd();
   }
   return flightModeOut;
 }
@@ -208,8 +191,6 @@ FLIGHTMODE uav::flightDescent() {
 
 // Gliding mode. 
 FLIGHTMODE uav::flightGliding() {
-
-  static double trim; 
 
   FLIGHTMODE flightModeOut;
   flightModeOut = GLIDING;

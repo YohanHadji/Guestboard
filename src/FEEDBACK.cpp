@@ -1,76 +1,8 @@
 #include "FEEDBACK.h"
 
 buzzerClass::buzzerClass()
- :buzzerPin(BUZZER_PIN), isOn(false), repeat(false)
+ :isOn(false), repeat(false)
 {
-    pinMode(buzzerPin, OUTPUT);
-}
-
-void buzzerClass::update() {
-    if (millis() - timeOn >= duration && isOn && repeat) {
-        timeOn = millis()-((millis()-timeOn)-duration);
-        isOn = false;
-        noTone(buzzerPin); 
-    }
-    
-    if (millis() - timeOff >= durationOff && !isOn && repeat) {
-        timeOff = millis()-((millis()-timeOff)-durationOff);
-        isOn = true;
-        tone(buzzerPin, frequency);
-    }
-
-    if (millis() - timeOn >= duration && !repeat) {
-        noTone(buzzerPin);
-    }
-}
-
-void buzzerClass::beep() {
-    tone(buzzerPin, frequency);
-    timeOn = millis();
-}
-
-//functions to produce the song we need depending on the state of R2HOME
-void buzzerClass::buzzerTurnOn() {
-    buzzerBeep(longLowFrequency); 
-}
-void buzzerClass::buzzerInit() { 
-    buzzerBeep(lowFrequency); 
-}
-void buzzerClass::buzzerInitEnd() { 
-    buzzerBeep(highFrequency);
- }
-void buzzerClass::buzzerChangeFlightMode() { 
-    buzzerBeep(longHighFrequency); 
-}
-
-void buzzerClass::buzzerBeep(typeBeeping type) {
-  switch (type) {
-    case lowFrequency:
-         frequency = 1000;
-         duration = 100;
-         beep();
-    break;
-
-    case longLowFrequency:
-        frequency = 1000;
-        duration = 200;
-        beep();
-    break;
-
-    case highFrequency:
-        frequency = 3000;
-        duration = 100;
-        beep();
-    break;
-    
-    case longHighFrequency:
-        frequency = 3000;
-        duration = 200;
-        beep();
-    break;
-  }
-  repeat = false;
-  isOn = true;
 }
 
 ledClass::ledClass() 

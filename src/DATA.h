@@ -49,7 +49,6 @@ enum dataListString {
     COURSE, 
     TEMPERATURE,
     PRESSURE, 
-    VDOWN_VALUE,
     MIX_VALUES,                 //dir, acc, dep
     OUTPUT_VALUES,               //l, r, x1, x2
     BAT_VALUES,

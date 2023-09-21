@@ -5,15 +5,12 @@ static int year, month, day, hour, minute, second;
 dataClass::dataClass(dataListString listIn[30], int len)
 : firstTimeSave(true)
 {
-  //if (DEBUG) { Serial.println("DataClass Constructor In Second");}
   for(int i(0); i < len; ++i) {
     list[i] = listIn[i];
   }
   for (int i(len); i < 25; i++) {
     list[i] = NULL_DATA;
   }
-  //if (DEBUG) { Serial.println("DataClass Constructor Out Second");}
-  //RADIOSONDE_PORT.begin(RADIOSONDE_BAUD);
 }
 
 void dataClass::begin() {
@@ -205,14 +202,11 @@ String dataClass::printStarterString() {
       case PRESSURE:
         output += "PRESSURE";
       break;
-      case VDOWN_VALUE:
-        output += "VDOWN";
-      break;
       case MIX_VALUES:
-        output += "DIR, BRK, ACC, DEP";
+        output += "SOL1_MIX, SOL2_MIX, SOL3_MIX, SOL4_MIX, SER1_MIX, SER2_MIX, IGN_MIX, BUZ_MIX";
       break;
       case OUTPUT_VALUES:
-        output += "L, R, X1, X2";
+        output += "SOL1_OUT, SOL2_OUT, SOL3_OUT, SOL4_OUT, SER1_OUT, SER2_OUT, IGN_OUT, BUZ_OUT";
       break;
       case BAT_VALUES:
         output += "BAT_VOLT, BAT_CURR";
@@ -309,10 +303,16 @@ String dataClass::print(sysStatus sysIn) {
         }
       break;
       case MIX_VALUES:
-        output += String(sysIn.mix.dir) + ",";
-        output += String(sysIn.mix.brk) + ",";
-        output += String(sysIn.mix.acc) + ",";
-        output += String(sysIn.mix.dep);
+        output += String(sysIn.mix.solenoid1) + ",";
+        output += String(sysIn.mix.solenoid2) + ",";
+        output += String(sysIn.mix.solenoid3) + ",";
+        output += String(sysIn.mix.solenoid4) + ",";
+        output += String(sysIn.mix.servo1) + ",";
+        output += String(sysIn.mix.servo2) + ",";
+        output += String(sysIn.mix.ignitor) + ",";
+        output += String(sysIn.mix.buzzer);
+      break;
+      case OUTPUT_VALUES:
       break;
       case BAT_VALUES:
         output += String(bat.get().voltage) + ",";
