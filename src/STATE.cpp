@@ -30,7 +30,6 @@ void uav::output() {
 }
 
 void uav::update() {
-  buzzer.update();
   led.update();
 }
 
@@ -42,31 +41,58 @@ FLIGHTMODE uav::flightState() {
   FLIGHTMODE flightModeOut;
 
   flightModeIn = sys.get().flightMode;
-  flightModeOut = INITIALIZE;
+  flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
 
-  if (data.cmd.isUpdated()) {
-    flightModeOut = executeCmd(flightModeIn,data.cmd.get());
+  if (data.com.isUpdated()) {
+    flightModeOut = executeCmd(flightModeIn,data.com.get());
   }
 
   else { // Depending on which flight mode, various checks are carried out
     switch(flightModeIn) {
-      case INITIALIZE:
+      case FLIGHTMODE::INITIALIZE_MODE:
         flightModeOut = flightInit();
       break;
-      case READYSTEADY:
+      case FLIGHTMODE::READYSTEADY_MODE:
         flightModeOut = readySteady();
       break;
-      case ASCENT:
+      case FLIGHTMODE::CALIBRATION_MODE:
+        flightModeOut = calibration();
+      break;
+      case FLIGHTMODE::MANUAL_MODE:
+        flightModeOut = manual();
+      break;
+      case FLIGHTMODE::ARMED_MODE:
+        flightModeOut = armed();
+      break;
+      case FLIGHTMODE::PRESSURED_MODE:
+        flightModeOut = pressured();
+      break;
+      case FLIGHTMODE::IGNITER_MODE:
+        flightModeOut = igniter();
+      break;
+      case FLIGHTMODE::IGNITION_MODE:
+        flightModeOut = ignition();
+      break;
+      case FLIGHTMODE::THRUST_MODE:
+        flightModeOut = thrust();
+      break;
+      case FLIGHTMODE::SHUTDOWN_MODE:
+        flightModeOut = shutdown();
+      break;
+      case FLIGHTMODE::ASCENT_MODE:
         flightModeOut = flightAscent();
       break;
-      case DESCENT:
+      case FLIGHTMODE::DESCENT_MODE:
         flightModeOut = flightDescent();
       break;
-      case GLIDING:
+      case FLIGHTMODE::GLIDING_MODE:
         flightModeOut = flightGliding();
       break;
+      case FLIGHTMODE::ABORT_MODE:
+        flightModeOut = abort();
+      break;
       default:
-        flightModeOut = INITIALIZE;
+        flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
       break;
     } 
   }
@@ -84,14 +110,14 @@ FLIGHTMODE uav::flightState() {
 FLIGHTMODE uav::flightInit() {
 
   FLIGHTMODE flightModeOut;
-  flightModeOut = INITIALIZE;
+  flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
 
   if (data.get().sen.valid) {
     if (!sys.isInitialised()) {
-      sys.setFlightMode(READYSTEADY);
+      sys.setFlightMode(FLIGHTMODE::READYSTEADY_MODE);
     }
     else {
-      flightModeOut = READYSTEADY;
+      flightModeOut = FLIGHTMODE::READYSTEADY_MODE;
     }
     sys.setReady();
   }
@@ -102,36 +128,112 @@ FLIGHTMODE uav::flightInit() {
 FLIGHTMODE uav::readySteady() { 
 
   FLIGHTMODE flightModeOut;
-  flightModeOut = READYSTEADY;
+  flightModeOut = FLIGHTMODE::READYSTEADY_MODE;
 
   if (!data.get().sen.valid) {
-    flightModeOut = INITIALIZE;
+    flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
     return flightModeOut;
-  }
-
-  if (data.get().sen.speed.z > VUP) {
-    flightModeOut = ASCENT;
-  }
-  if (data.get().sen.speed.z < VDOWN) {
-    flightModeOut = DESCENT;
-  }
-  
+  }  
   return flightModeOut;
+}
+
+// Calibration of engine's sensors.
+FLIGHTMODE uav::calibration() {
+    FLIGHTMODE flightModeOut;
+    flightModeOut = FLIGHTMODE::CALIBRATION_MODE;
+  
+    if (!data.get().sen.valid) {
+      flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
+      return flightModeOut;
+    }
+  
+    return flightModeOut;
+}
+
+// Working state for when the engine is manually controlled. 
+// Whenever the engine receives a manual operation command, it gets locked to this state. 
+// This is meant to avoid messing up the sequence, when manual valve operation is used.
+// Can move back to IDLE by issuing the RECOVER command.
+FLIGHTMODE uav::manual() {
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::MANUAL_MODE;
+  return flightModeOut;
+}
+
+// From this state, the system can be safely pressured.
+// Can move to PRESSURED with the PRESSURE command.
+FLIGHTMODE uav::armed() {
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::ARMED_MODE;
+  return flightModeOut;
+}
+
+// The engine is pressured and ready for ignition.
+// Can move to IGNITER with the IGNITE command.
+FLIGHTMODE uav::pressured() {
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::PRESSURED_MODE;
+  return flightModeOut;
+}
+
+// The igniter is fired.
+// After IGNITER_COUNTER is elapsed, we move to IGNITION.
+FLIGHTMODE uav::igniter() {
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::IGNITER_MODE;
+
+  if (timeDiff(sys.get().timeTransition,sys.get().time) >= IGNITER_COUNTER*1000.0) {
+    flightModeOut = FLIGHTMODE::IGNITION_MODE;
+  }
+}
+
+// Fuel and Oxydizer valves are partially opened.
+// After IGNITION_COUNTER is elapsed, we move to THRUST.
+FLIGHTMODE uav::ignition() {
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::IGNITION_MODE;
+
+  if (timeDiff(sys.get().timeTransition,sys.get().time) >= IGNITION_COUNTER*1000.0) {
+    flightModeOut = FLIGHTMODE::THRUST_MODE;
+  }
+}
+
+// Fuel and Oxydizer valves are fully opened.
+// After THRUST_COUNTER is elapsed, we move to SHUTDOWN.
+FLIGHTMODE uav::thrust() {
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::THRUST_MODE;
+
+  if (timeDiff(sys.get().timeTransition,sys.get().time) >= THRUST_COUNTER*1000.0) {
+    flightModeOut = FLIGHTMODE::SHUTDOWN_MODE;
+  }
+}
+
+
+// Fuel Valve is closed.
+// After SHUTDOWN_COUNTER is elapsed, we move to ASCENT.
+FLIGHTMODE uav::shutdown() {
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::SHUTDOWN_MODE;
+
+  if (timeDiff(sys.get().timeTransition,sys.get().time) >= SHUTDOWN_COUNTER*1000.0) {
+    flightModeOut = FLIGHTMODE::ASCENT_MODE;
+  }
 }
 
 // Ascent mode, if Z speed is lower than VUP go back to readysteady mode, if we reach the separation altitude, separate.
 FLIGHTMODE uav::flightAscent() {
 
   FLIGHTMODE flightModeOut;
-  flightModeOut = ASCENT;
+  flightModeOut = FLIGHTMODE::ASCENT_MODE;
 
   if (!data.get().sen.valid) {
-    flightModeOut = INITIALIZE;
+    flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
     return flightModeOut;
   }
 
-  if (data.get().sen.speed.z < VUP) {
-    flightModeOut = READYSTEADY;
+  if (data.get().sen.speed.z < VDOWN) {
+    flightModeOut = FLIGHTMODE::DESCENT_MODE;
   }
 
   return flightModeOut;
@@ -141,15 +243,15 @@ FLIGHTMODE uav::flightAscent() {
 FLIGHTMODE uav::flightDescent() {
 
   FLIGHTMODE flightModeOut;
-  flightModeOut = DESCENT;
+  flightModeOut = FLIGHTMODE::DESCENT_MODE;
 
   if (!data.get().sen.valid) {
-    flightModeOut = INITIALIZE;
+    flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
     return flightModeOut;
   }
   
   if (data.get().sen.speed.z > VDOWN) {
-    flightModeOut = READYSTEADY;
+    flightModeOut = FLIGHTMODE::READYSTEADY_MODE;
   }
 
   // We have two differents deployment mode, one using a target altitude, and one using a timer
@@ -163,7 +265,7 @@ FLIGHTMODE uav::flightDescent() {
 
     case 0:
       if (safetyTimer) {
-        flightModeOut = GLIDING;
+        flightModeOut = FLIGHTMODE::GLIDING_MODE;
       }
     break;
 
@@ -173,13 +275,13 @@ FLIGHTMODE uav::flightDescent() {
 
         case 0:
           if (safetyTimer and data.get().sen.position.alt < DEP_ALT) {
-            flightModeOut = GLIDING;
+            flightModeOut = FLIGHTMODE::GLIDING_MODE;
           }
         break;
 
         default:
           if (safetyTimer and data.get().sen.position.alt < DEP_ALT) {
-            flightModeOut = GLIDING;
+            flightModeOut = FLIGHTMODE::GLIDING_MODE;
           }
         break;
 
@@ -193,35 +295,123 @@ FLIGHTMODE uav::flightDescent() {
 FLIGHTMODE uav::flightGliding() {
 
   FLIGHTMODE flightModeOut;
-  flightModeOut = GLIDING;
+  flightModeOut = FLIGHTMODE::GLIDING_MODE;
   return flightModeOut;
 }
 
-FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, cmdStatus cmd) {
-  FLIGHTMODE flightModeOut = INITIALIZE;
-  switch(cmd.tlmCmd) {
+// Abort mode.
+FLIGHTMODE uav::abort() {
 
-    case TLM_CMD::SEPARATE_CMD:
-      sys.separate();
-      flightModeOut = flightModeIn;
+  FLIGHTMODE flightModeOut;
+  flightModeOut = FLIGHTMODE::ABORT_MODE;
+  return flightModeOut;
+}
+
+FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
+  FLIGHTMODE flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
+  switch(com.cmdId) {
+
+    case CMD_ID::AV_CMD_VALVE_FUEL:
+    {
+      flightModeOut = FLIGHTMODE::MANUAL_MODE;
+      mixStatus currentMix = sys.mix.get();
+      if (com.cmdValue == ACTIVE) {
+        currentMix.solenoid1 = SOLENOID1_OPEN;
+      }
+      else if (com.cmdValue == INACTIVE) {
+        currentMix.solenoid1 = !SOLENOID1_OPEN;
+      }
+      sys.mix.setManualMemory(currentMix);
+    }
     break;
 
-    case TLM_CMD::DEPLOY_CMD:
-      if (flightModeIn != ASCENT) {
+    case CMD_ID::AV_CMD_VALVE_N2O:
+    {
+      flightModeOut = FLIGHTMODE::MANUAL_MODE;
+      mixStatus currentMix = sys.mix.get();
+      if (com.cmdValue == ACTIVE) {
+        currentMix.solenoid2 = SOLENOID2_OPEN;
+      }
+      else if (com.cmdValue == INACTIVE) {
+        currentMix.solenoid2 = !SOLENOID2_OPEN;
+      }
+      sys.mix.setManualMemory(currentMix);
+    }
+    break;
+
+    case CMD_ID::AV_CMD_VENT_FUEL:
+    {
+      flightModeOut = FLIGHTMODE::MANUAL_MODE;
+      mixStatus currentMix = sys.mix.get();
+      if (com.cmdValue == ACTIVE) {
+        currentMix.solenoid3 = SOLENOID3_OPEN;
+      }
+      else if (com.cmdValue == INACTIVE) {
+        currentMix.solenoid3 = !SOLENOID3_OPEN;
+      }
+      sys.mix.setManualMemory(currentMix);
+    }
+    break;
+
+    case CMD_ID::AV_CMD_VENT_N2O:
+    {
+      flightModeOut = FLIGHTMODE::MANUAL_MODE;
+      mixStatus currentMix = sys.mix.get();
+      if (com.cmdValue == ACTIVE) {
+        currentMix.solenoid4 = SOLENOID4_OPEN;
+      }
+      else if (com.cmdValue == INACTIVE) {
+        currentMix.solenoid4 = !SOLENOID4_OPEN;
+      }
+      sys.mix.setManualMemory(currentMix);
+    }
+    break;
+
+    case CMD_ID::MANUAL:
+    {
+      flightModeOut = FLIGHTMODE::MANUAL_MODE;
+      mixStatus currentMix = sys.mix.get();
+      sys.mix.setManualMemory(currentMix);
+    }
+    break;
+
+    case CMD_ID::ARMED:
+    {
+      if (flightModeIn == READYSTEADY_MODE) {
+        flightModeOut = FLIGHTMODE::ARMED_MODE;
       }
       else {
         flightModeOut = flightModeIn;
       }
+    }
     break;
 
-    case TLM_CMD::PING_CMD:
-      data.send(sys.get());
-      flightModeOut = flightModeIn;
+    case CMD_ID::PRESSURISED:
+    {
+      if (flightModeIn == ARMED) {
+        flightModeOut = FLIGHTMODE::PRESSURED_MODE;
+      }
+      else {
+        flightModeOut = flightModeIn;
+      }
+    }
     break;
 
-    case TLM_CMD::NO_CMD:
-      flightModeOut = flightModeIn;
+    case CMD_ID::IGNITION:
+    {
+      if (flightModeIn == PRESSURED_MODE) {
+        flightModeOut = FLIGHTMODE::IGNITER_MODE;
+      }
+      else {
+        flightModeOut = flightModeIn;
+      }
+    }
     break;
+
+    case CMD_ID::ABORT:
+      flightModeOut = FLIGHTMODE::ABORT_MODE;
+    break;
+
 
     default:
       flightModeOut = flightModeIn;

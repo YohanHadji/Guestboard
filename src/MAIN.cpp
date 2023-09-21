@@ -19,7 +19,7 @@ void setup() {
 
   senSettings basicSettings;
   nordend.data.sen.begin(basicSettings);
-  nordend.data.cmd.begin();
+  nordend.data.com.begin();
   if (SD.begin(chipSelect)) {
   }
   // Must be called after SD.begin();

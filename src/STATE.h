@@ -17,9 +17,18 @@ class uav {
     // Flight mode functions
     FLIGHTMODE flightInit();
     FLIGHTMODE readySteady();
+    FLIGHTMODE calibration();
+    FLIGHTMODE manual();
+    FLIGHTMODE armed();
+    FLIGHTMODE pressured();
+    FLIGHTMODE igniter();
+    FLIGHTMODE ignition();
+    FLIGHTMODE thrust();
+    FLIGHTMODE shutdown();
     FLIGHTMODE flightAscent();
     FLIGHTMODE flightDescent();
     FLIGHTMODE flightGliding();
+    FLIGHTMODE abort();
 
     dataClass data;
     sysClass  sys;
@@ -27,7 +36,7 @@ class uav {
   private:
     buzzerClass buzzer;
     ledClass    led;
-    FLIGHTMODE executeCmd(FLIGHTMODE, cmdStatus);
+    FLIGHTMODE executeCmd(FLIGHTMODE, comStatus);
 };
 
 #endif 

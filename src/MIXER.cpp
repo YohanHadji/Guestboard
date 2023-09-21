@@ -1,7 +1,7 @@
 #include "MIXER.h"
 
 sysClass::sysClass() 
-  :flightMode(INITIALIZE),
+  :flightMode(INITIALIZE_MODE),
   initialised(false), separated(false), deployed(false), chuteOpened(false)
 {
   time.second = 0;
@@ -53,8 +53,47 @@ mixStatus mixClass::get() {
 mixStatus mixClass::compute(sysStatus sysIn) {
   mixStatus mixOut;
   switch (sysIn.flightMode) {
-    case INITIALIZE:
+    case FLIGHTMODE::INITIALIZE_MODE:
       mixOut = mixInit(sysIn);
+    break;
+    case FLIGHTMODE::READYSTEADY_MODE:
+      mixOut = mixReadySteady(sysIn);
+    break;
+    case FLIGHTMODE::CALIBRATION_MODE:
+      mixOut = mixCalibration(sysIn);
+    break;
+    case FLIGHTMODE::MANUAL_MODE:
+      mixOut = mixManual(sysIn);
+    break;
+    case FLIGHTMODE::ARMED_MODE:
+      mixOut = mixArmed(sysIn);
+    break;
+    case FLIGHTMODE::PRESSURED_MODE:
+      mixOut = mixPressured(sysIn);
+    break;
+    case FLIGHTMODE::IGNITER_MODE:
+      mixOut = mixIgniter(sysIn);
+    break;
+    case FLIGHTMODE::IGNITION_MODE:
+      mixOut = mixIgnition(sysIn);
+    break;
+    case FLIGHTMODE::THRUST_MODE:
+      mixOut = mixThrust(sysIn);
+    break;
+    case FLIGHTMODE::SHUTDOWN_MODE:
+      mixOut = mixShutdown(sysIn);
+    break;
+    case FLIGHTMODE::ASCENT_MODE:
+      mixOut = mixFlightAscent(sysIn);
+    break;
+    case FLIGHTMODE::DESCENT_MODE:
+      mixOut = mixFlightDescent(sysIn);
+    break;
+    case FLIGHTMODE::GLIDING_MODE:
+      mixOut = mixFlightGliding(sysIn);
+    break;
+    case FLIGHTMODE::ABORT_MODE:
+      mixOut = mixAbort(sysIn);
     break;
     default:
       mixOut = mixInit(sysIn);
@@ -76,4 +115,80 @@ mixStatus mixClass::mixInit(sysStatus sysIn) {
   mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
   return mixOut;
 }
+
+mixStatus mixClass::mixReadySteady(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  return mixOut;
+}
+
+mixStatus mixClass::mixCalibration(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  return mixOut;
+}
+
+mixStatus mixClass::mixManual(sysStatus sysIn) {
+  return mixManualMemory;
+}
+
+mixStatus mixClass::mixArmed(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  return mixOut;
+}
+
+// The engine is pressured and ready for ignition.
+// Can move to IGNITER with the IGNITE command.
+mixStatus mixClass::mixPressured(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  return mixOut;
+}
+
+// The igniter is fired.
+// After IGNITER_COUNTER is elapsed, we move to IGNITION.
+mixStatus mixClass::mixIgniter(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  mixOut.ignitor = IGNITOR_ACTIVE;
+  return mixOut;
+}
+
+
+// Fuel and Oxydizer valves are partially opened.
+// After IGNITION_COUNTER is elapsed, we move to THRUST.
+mixStatus mixClass::mixIgnition(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  mixOut.solenoid1 = SOLENOID1_OPEN;
+  mixOut.solenoid2 = SOLENOID2_OPEN;
+  mixOut.solenoid3 = SOLENOID3_OPEN;
+  mixOut.solenoid4 = SOLENOID4_OPEN;
+  return mixOut;
+}
+
+
+// Fuel and Oxydizer valves are fully opened.
+// After THRUST_COUNTER is elapsed, we move to SHUTDOWN.
+mixStatus mixClass::mixThrust(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  mixOut.solenoid1 = SOLENOID1_OPEN;
+  mixOut.solenoid2 = SOLENOID2_OPEN;
+  mixOut.solenoid3 = SOLENOID3_OPEN;
+  mixOut.solenoid4 = SOLENOID4_OPEN;
+  return mixOut;
+}
+
+// Fuel Valve is closed.
+// After SHUTDOWN_COUNTER is elapsed, we move to ASCENT.
+mixStatus mixClass::mixShutdown(sysStatus sysIn) {
+  mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
+  mixOut.solenoid1 = !SOLENOID1_OPEN;
+  mixOut.solenoid2 = !SOLENOID2_OPEN;
+  mixOut.solenoid3 = !SOLENOID3_OPEN;
+  mixOut.solenoid4 = !SOLENOID4_OPEN;
+  return mixOut;
+}
+
+void mixClass::setManualMemory(mixStatus mixIn) {
+  mixManualMemory = mixIn;
+}
+
+
+
 

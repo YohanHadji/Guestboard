@@ -19,14 +19,14 @@ void dataClass::begin() {
 
 dataStruct dataClass::get() {
   dataStruct dataOut;
-  dataOut.cmd = cmd.get();
+  dataOut.com = com.get();
   dataOut.sen = sen.get();
   dataOut.bat = bat.get();
   return dataOut;
 }
 
 bool dataClass::update() {
-  cmd.update();
+  com.update();
   bat.update();
   if (sen.update()) {
     updated = true;
@@ -182,7 +182,7 @@ String dataClass::printStarterString() {
         output += "WING_OPEN";
       break;
       case SEN_HEALTH:
-        output += "SENSOR_VALID, GPS_VALID, SAT_NUMBER, VERTICAL_ACCURACY, TIME_VALID";
+        output += "SENSOR_VALID, GPS_MAIN_VALID, SAT_MAIN_NUMBER, GPS_AUX_VALID, SAT_AUX_NUMBER, TIME_VALID";
       break;
       case POSITION_VALUES:
         output += "LATITUDE, LONGITUDE, ALTITUDE";
@@ -266,9 +266,10 @@ String dataClass::print(sysStatus sysIn) {
       break;
       case SEN_HEALTH:
         output += String(sen.isValid()) + ",";
-        output += String(sen.get().gps.isValid) + ",";
-        output += String(sen.get().gps.satNumber) + ",";
-        output += String(sen.get().gps.vAcc) + ","; 
+        output += String(sen.get().gpsMainStatus.isValid) + ",";
+        output += String(sen.get().gpsMainStatus.satNumber) + ",";
+        output += String(sen.get().gpsAuxStatus.isValid) + ",";
+        output += String(sen.get().gpsAuxStatus.satNumber) + ",";
         output += String(sen.get().time.isValid);
       break;
       case POSITION_VALUES:
@@ -292,11 +293,11 @@ String dataClass::print(sysStatus sysIn) {
         output += String(sen.get().course);
       break;
       case TEMPERATURE:
-        output += String(sen.get().temperature);
+        output += String(sen.get().baro.temperature);
       break;
       case PRESSURE:
-        if (sen.get().pressure != 0) {
-          output += String(sen.get().pressure);
+        if (sen.get().baro.pressure != 0) {
+          output += String(sen.get().baro.pressure);
         }
         else {
           output += "99999.0";

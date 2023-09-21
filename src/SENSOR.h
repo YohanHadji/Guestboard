@@ -4,6 +4,10 @@
 #include "Arduino.h"
 #include "CONFIG.h"
 
+#include "SENSOR_MISC/GPS.h"
+#include "SENSOR_MISC/BARO.h"
+#include "SENSOR_MISC/PROPULSION.h"
+
 struct senSettings {
 };
 
@@ -43,7 +47,6 @@ struct gpsStatus {
   unsigned fixType;
   unsigned int hdop;
   unsigned int satNumber;
-  unsigned int vAcc;
   bool isValid;
 };
 
@@ -67,12 +70,16 @@ struct senStatus {
   double twoDSpeed;
   double threeDSpeed;
   rpyCoord attitude;
-  gpsStatus gps;
   double course;
-  double temperature;
-  uint32_t pressure;
+
   bool valid;
   bool updated;
+
+  gpsStatus gpsMainStatus;
+  gpsStatus gpsAuxStatus;
+  barStatus baro;
+  proStatus prop;
+
   elapsedMillis msSinceMidnight;
 };
 
@@ -93,16 +100,22 @@ class senClass {
     void config(senSettings settings);
     void setNoRotation(int16_t timeForNoRotation);
     void printReceived();
+
+    // GLOBAL ESTIMATOR VALUES // 
     timeStruct time;
     gpsCoord position;
     xyzCoord speed;
     rpyCoord attitude;
     gpsStatus gps;
     double course;
-    double temperature;
-    uint32_t pressure;
     bool updated;
     bool valid;
+
+    // RAW SENSOR VALUES // 
+    barClass baro;
+    proClass prop;
+    TinyGPSPlus gpsMain;
+    TinyGPSPlus gpsAux;
 };
 
 

@@ -6,9 +6,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include "CONFIG.h"
-#include "COMMAND.h"
 #include "MIXER.h"
-#include "../ERT_RF_Protocol_Interface/PacketDefinition.h"
 
 struct batStatus {
     double voltage;
@@ -17,7 +15,7 @@ struct batStatus {
 
 struct dataStruct { 
   senStatus sen;
-  cmdStatus cmd;
+  comStatus com;
   batStatus bat;
 };
 
@@ -68,7 +66,7 @@ class dataClass {
     bool isUpdated();
 
     senClass sen;
-    cmdClass cmd;
+    comClass com;
     batClass bat;
     
   private:
