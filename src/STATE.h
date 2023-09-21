@@ -1,9 +1,8 @@
-#ifndef STATE
-#define STATE
+#ifndef STATE_H
+#define STATE_H
 
 #include "FEEDBACK.h"
 #include "Arduino.h"
-#include "NAVIGATION.h"
 #include "DATA.h"
 #include "CONFIG.h"
 

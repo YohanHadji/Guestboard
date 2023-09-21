@@ -2,94 +2,6 @@
 
 static int year, month, day, hour, minute, second;
 
-waypointData readWaypoint() {
-
-  File missionFile = SD.open("mission.txt", FILE_READ);
-  bool endOfFile = false;
-  waypointData failReading;
-  failReading.length = 0;
-
-  if (!missionFile) {
-    return failReading;
-  }
-
-  double dataArray[51][4]; // Added one to prevent potential data flooding
-
-  for (int i = 0; i < 50; i++) {
-    for (int j = 0; j < 3; j++) {
-      dataArray[i][j] = 0;
-    }
-  }
-
-  while (missionFile.available() && !endOfFile) {
-
-    char dataChar;
-    String recupData;
-    int i(0);
-    int j(0);
-
-    do {
-      dataChar = missionFile.read();
-      if (dataChar != 10 and dataChar != 13 and dataChar != '*') {
-        if (dataChar != ',') {
-          recupData += dataChar;
-        }
-        else {
-          dataArray[i][j] = recupData.toFloat();
-          recupData = "";
-          j++;
-        }
-      }
-      else {
-        dataArray[i][j] = recupData.toFloat();
-        recupData = "";
-        j = 0;
-        i++;
-      }
-    } while (dataChar != '*');
-
-    endOfFile = true;
-  }
-
-  int nbOfWaypoint;
-
-  for (int i = 0; i < 50; i++) {
-    if (dataArray[i][0] == 0) {
-      nbOfWaypoint = i;
-      break;
-    }
-    else if (dataArray[i][0] != 0 && i == 49) {
-      nbOfWaypoint = 49;
-    }
-  }
-
-  gpsCoord waypointMemory[nbOfWaypoint+1];
-
-  for (int i(0); i < nbOfWaypoint; ++i) {
-    waypointMemory[i].lat = dataArray[i][0];
-    waypointMemory[i].lng = dataArray[i][1];
-    waypointMemory[i].alt = dataArray[i][2];
-    if (DEBUG) {
-      Serial.println("List of waypoints as read..");
-      Serial.print(waypointMemory[i].lat,12); Serial.print(" "); 
-      Serial.print(waypointMemory[i].lng,12); Serial.print(" "); 
-      Serial.println(waypointMemory[i].alt,12);
-      Serial.println("Size of waypoint list as calculated..");
-      Serial.println(nbOfWaypoint);
-    }
-  }
-
-  waypointData waypointMemoryData;
-  waypointMemoryData.length = nbOfWaypoint;
-
-  for (int i = 0; i < nbOfWaypoint; i++) {
-    waypointMemoryData.gpsData[i] = waypointMemory[i];
-  }
-
-  return waypointMemoryData;
-}
-
-
 dataClass::dataClass(dataListString listIn[30], int len)
 : firstTimeSave(true)
 {
@@ -105,7 +17,6 @@ dataClass::dataClass(dataListString listIn[30], int len)
 }
 
 void dataClass::begin() {
-  RADIOSONDE_PORT.begin(RADIOSONDE_BAUD);
   SdFile::dateTimeCallback(dateTime);
 }
 
@@ -129,110 +40,25 @@ bool dataClass::update() {
 }
 
 void dataClass::send(sysStatus sysIn) {
-  TelemetryPacket packet;
+  // TelemetryPacket packet;
 
-  senStatus senData = sen.get();
+  // senStatus senData = sen.get();
 
-  gpsCoord driftPoint;
-  driftPoint.lat = sysIn.nav.sim.lat;
-  driftPoint.lng = sysIn.nav.sim.lng;
-  double distTraj = distanceTo(driftPoint,sysIn.nav.waypoint);
-         
-  gpsCoord currentPoint;
-  currentPoint.lat = sen.get().position.lat;
-  currentPoint.lng = sen.get().position.lng;
-  double distPos = distanceTo(currentPoint,sysIn.nav.waypoint);
+  // packet.timeSecond = senData.time.code.second;
+  // packet.flightMode = sysIn.flightMode; 
 
-  double realSetpoint = 0;
-  if(sysIn.nav.navMode == COG) {
-    realSetpoint = -sysIn.nav.con.input+senData.course;
-    realSetpoint = (int((realSetpoint+360)*100.0)%36000)/100.0;
-  }
-  if (sysIn.nav.navMode == HEADING_ABSOLUTE) {
-    realSetpoint = -sysIn.nav.con.input+senData.attitude.yaw;
-    realSetpoint = (int((realSetpoint+360)*100.0)%36000)/100.0;
-  }
-  if (sysIn.nav.navMode == HEADING_RELATIVE or sysIn.nav.navMode == HEADING_RELATIVE_FINAL or sysIn.nav.navMode == MANUAL) {
-    realSetpoint = sysIn.nav.headingRelativeSetpoint;
-  }
+  // size_t size = sizeof(packet); // Get the size of the struct in bytes
+  // byte* buffer = new byte[size]; // Allocate memory for the byte array
+  // memcpy(buffer, &packet, size); // Copy the struct to the byte array
 
-  packet.timeSecond = senData.time.code.second;
-  packet.flightMode = sysIn.flightMode; 
+  // size_t codedSize = cmd.telemetryRadio.getCodedLen(size);
+  // byte packetId = 0x00;
+  // byte* codedBuffer = cmd.telemetryRadio.encode(packetId, buffer, size);
 
-  // packet.status is 1 byte where each bit represents a status. 
-  // Bit 0 = initialised
-  // Bit 1 = separated
-  // Bit 2 = deployed 
-  // Bit 3 = wing opened 
-  // Bit 4 = sensor valid 
-  // Bit 5 = gps valid
-  // Bit 6 = time valid
+  // TLM_PORT.write(codedBuffer, codedSize);
 
-  packet.status = 0;
-  if (sysIn.initialised) {
-    packet.status |= 1;
-  }
-  if (sysIn.separated) {
-    packet.status |= 2;
-  }
-  if (sysIn.deployed) {
-    packet.status |= 4;
-  }
-  if (sysIn.wingOpened) {
-    packet.status |= 8;
-  }
-  if (senData.valid) {
-    packet.status |= 16;
-  }
-  if (senData.gps.isValid) {
-    packet.status |= 32;
-  }
-  if (senData.time.isValid) {
-    packet.status |= 64;
-  }
-
-  senData.gps.fixType = senData.gps.fixType;
-
-  packet.latitude = senData.position.lat;
-  packet.longitude = senData.position.lng;
-  packet.altitude = senData.position.alt;
-
-  packet.yaw = senData.attitude.yaw;
-  packet.rotationSpeed = senData.rotationSpeedAvgData;
-
-  packet.zSpeed = senData.speed.z;
-  packet.twoDSpeed = senData.twoDSpeed;
-
-  packet.temperature = senData.temperature;
-  packet.voltage = bat.get().voltage;
-
-  packet.waypointLatitude = sysIn.nav.waypoint.lat;
-  packet.waypointLongitude = sysIn.nav.waypoint.lng;
-  packet.waypointAltitude = sysIn.nav.waypoint.alt;
-
-  packet.trajectoryLatitude = driftPoint.lat;
-  packet.trajectoryLongitude = driftPoint.lng;
-
-  // packet.distanceToTrajectory = distTraj;
-  // packet.distanceToPosition = distPos;
-
-  packet.relativeHeadingSetpoint = realSetpoint;
-  packet.projectedGroundSpeed = sysIn.nav.projectedGroundSpeed;
-
-  size_t size = sizeof(packet); // Get the size of the struct in bytes
-  byte* buffer = new byte[size]; // Allocate memory for the byte array
-  memcpy(buffer, &packet, size); // Copy the struct to the byte array
-
-  size_t codedSize = cmd.telemetryRadio.getCodedLen(size);
-  byte packetId = 0x00;
-  byte* codedBuffer = cmd.telemetryRadio.encode(packetId, buffer, size);
-  //codedBuffer = cmd.telemetryRadio.encode(packetId, buffer, size);
-
-  TLM_PORT.write(codedBuffer, codedSize);
-
-  //Serial.println("Telemetry sent");
-  delete[] buffer; // Don't forget to deallocate the memory when you're done
-  delete[] codedBuffer;
+  // delete[] buffer; // Don't forget to deallocate the memory when you're done
+  // delete[] codedBuffer;
 }
 
 void dataClass::save(sysStatus sysIn) {
@@ -254,7 +80,6 @@ void dataClass::save(sysStatus sysIn) {
         sdNameFile = day*1000000 + hour*10000 + minute*100 + second;
         sprintf(namebuff, "%d.txt", sdNameFile);
         sprintf(namebuffLowRate, "%dLR.txt", sdNameFile);
-        sprintf(namebuffWaypointLog, "%dWPLog.txt", sdNameFile);
         trialNumber++;
       } while (SD.exists(namebuff));
 
@@ -271,13 +96,6 @@ void dataClass::save(sysStatus sysIn) {
         dataFileLowRate.println(printStarterString());
       }
       dataFileLowRate.close();
-
-      SdFile::dateTimeCallback(dateTime);
-      waypointLogFile = SD.open(namebuffWaypointLog, FILE_WRITE);
-      if (waypointLogFile) {
-         waypointLogFile.println(printStarterStringWaypoint(sysIn));
-      }
-      waypointLogFile.close();
       firstTimeSave = false;
     }
 
@@ -287,13 +105,6 @@ void dataClass::save(sysStatus sysIn) {
       dataFile.println(print(sysIn)); 
     }
     dataFile.close(); 
-
-    SdFile::dateTimeCallback(dateTime);
-    waypointLogFile = SD.open(namebuffWaypointLog, FILE_WRITE);
-    if (waypointLogFile) {
-      waypointLogFile.println(printWaypoint(sysIn));
-    }
-    waypointLogFile.close();
 
     if (LOW_RATE) {
       static timeCode lastTime;
@@ -306,14 +117,6 @@ void dataClass::save(sysStatus sysIn) {
         }
         dataFileLowRate.close(); 
       }
-      /* if (millis()-lastTime>=(1000.0/LOW_RATE_RATE)) {
-        lastTime = millis()-((millis()-lastTime)-(1000.0/LOW_RATE_RATE));
-        dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
-        if (dataFileLowRate) { 
-          dataFileLowRate.println(print(sysIn)); 
-        }
-        dataFileLowRate.close(); 
-      } */
     }
   }
 
@@ -325,44 +128,10 @@ void dataClass::save(sysStatus sysIn) {
 
   if (TLM_MAIN) {
     static timeCode lastTime;
-    //Serial.print(sen.get().time.code.second); Serial.print(" "); Serial.println(sen.get().time.code.nanosecond);
-    //Serial.println(sen.timeDiff(sen.get().time.code,lastTime));
     if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/(TLM_MAIN_RATE))) {
       lastTime = sen.get().time.code;
       send(sysIn);
     }
-    /* if (millis()-lastTime>=(1000.0/(TLM_MAIN_RATE)))  {
-      lastTime = millis()-((millis()-lastTime)-(1000.0/(TLM_MAIN_RATE)));
-      send(sysIn);
-    } */
-  }
-
-  if(TLM_RADIOSONDE) {
-    static timeCode lastTime;
-    if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/TLM_RADIOSONDE_RATE)) {
-      lastTime = sen.get().time.code;
-      String shortTLM = "";
-      shortTLM = (String)TLM_RADIOSONDE_START + (String)TLM_RADIOSONDE_PREFIX +
-                  String(sysIn.flightMode)+"C"+
-                  String(int(bat.get().voltage*10.0))+"C"+
-                  String(int(sen.get().temperature))+"C"+
-                  String(int(sen.get().attitude.yaw))+"C"+
-                  String(int(sen.get().speed.z*10.0));
-      RADIOSONDE_PORT.println(shortTLM);
-      //Serial.println(shortTLM);
-    }
-    /* if (millis()-lastTime>=(1000.0/TLM_RADIOSONDE_RATE)) {
-      lastTime = millis()-((millis()-lastTime)-(1000.0/TLM_RADIOSONDE_RATE));
-      String shortTLM = "";
-      shortTLM = (String)TLM_RADIOSONDE_START + (String)TLM_RADIOSONDE_PREFIX +
-                  String(sysIn.flightMode)+"C"+
-                  String(int(bat.get().voltage*10.0))+"C"+
-                  String(int(sen.get().temperature))+"C"+
-                  String(int(sen.get().attitude.yaw))+"C"+
-                  String(int(sen.get().speed.z*10.0));
-      RADIOSONDE_PORT.println(shortTLM);
-      //Serial.println(shortTLM);
-    } */
   }
 }
 
@@ -412,7 +181,7 @@ String dataClass::printStarterString() {
       case DEPLOYED:
         output += "DEPLOYED";
       break;
-      case WING_OPEN:
+      case CHUTE_OPEN:
         output += "WING_OPEN";
       break;
       case SEN_HEALTH:
@@ -421,7 +190,7 @@ String dataClass::printStarterString() {
       case POSITION_VALUES:
         output += "LATITUDE, LONGITUDE, ALTITUDE";
       break;
-      case INCLINATION_VALUES:
+      case ATTITUDE_VALUES:
         output += "ROLL, PITCH, YAW";
       break;
       case SPEED_VALUES:
@@ -439,35 +208,11 @@ String dataClass::printStarterString() {
       case VDOWN_VALUE:
         output += "VDOWN";
       break;
-      case WAYPOINT_POSITION_VALUES:
-        output += "WAYPOINT_LAT, WAYPOINT_LON, WAYPOINT_ALT";
-      break;
-      case WAYPOINT_SCORE:
-        output += "WAYPOINT_SCORE";
-      break;
-      case TRAJ_VALUES:
-        output += "TRAJ_LAT, TRAJ_LON";
-      break;
-      case DIST_TRAJ:
-        output += "DIST_TRAJ";
-      break;
-      case DIST_POS:
-        output += "DIST_POS";
-      break;
-      case NAV_VALUES:
-        output += "INPUT, SETPOINT, SETPOINT_REAL, OUTPUT, NAVMODE, PROJECTED_SPEED";
-      break;
       case MIX_VALUES:
         output += "DIR, BRK, ACC, DEP";
       break;
-      case SERVO_VALUES:
+      case OUTPUT_VALUES:
         output += "L, R, X1, X2";
-      break;
-      case WIND_VALUES:
-        output += "WIND_SPE_GFS, WIND_DIR_GFS, WIND_SPE_MEASURED, WIND_DIR_MEASURED";
-      break;
-      case FACTOR_VALUE:
-        output += "FACTOR";
       break;
       case BAT_VALUES:
         output += "BAT_VOLT, BAT_CURR";
@@ -476,34 +221,6 @@ String dataClass::printStarterString() {
     if(i<(len-1) && list[i+1] != NULL_DATA) { output += ", "; }
   }
   output += "";
-  return output;
-}
-
-String dataClass::printStarterStringWaypoint(sysStatus sysIn) {
-  String output = "";
-  int len = sysIn.nav.waypointChoice.length;
-  output += "TIME_CODE, ";
-  for(int i(0); i < len; ++i) {
-    output += "WAYPOINT_"+String(i)+"_LAT, "+ 
-              "WAYPOINT_"+String(i)+"_LON, "+
-              "WAYPOINT_"+String(i)+"_ALT, "+
-              "WAYPOINT_"+String(i)+"_SCORE";
-    if(i!=len-1) { output += ", "; }
-  }
-  return output;
-}
-
-String dataClass::printWaypoint(sysStatus sysIn) {
-  String output = "";
-  int len = sysIn.nav.waypointChoice.length;
-  output += String((sysIn.time.second+sysIn.time.nanosecond/1000000000.0),4) + ", ";
-  for(int i(0); i < len; ++i) {
-    output += String(sysIn.nav.waypointChoice.gpsData[i].lat,5)+", "+
-              String(sysIn.nav.waypointChoice.gpsData[i].lng,5)+", "+
-              String(sysIn.nav.waypointChoice.gpsData[i].alt,0)+", "+
-              String(sysIn.nav.waypointChoice.score[i]);
-    if(i!=len-1) { output += ", "; }
-  }
   return output;
 }
 
@@ -550,8 +267,8 @@ String dataClass::print(sysStatus sysIn) {
       case DEPLOYED:
         output += String(sysIn.deployed);
       break;
-      case WING_OPEN:
-        output += String(sysIn.wingOpened);
+      case CHUTE_OPEN:
+        output += String(sysIn.chuteOpened);
       break;
       case SEN_HEALTH:
         output += String(sen.isValid()) + ",";
@@ -565,7 +282,7 @@ String dataClass::print(sysStatus sysIn) {
         output += String(sen.get().position.lng,5) + ",";
         output += String(sen.get().position.alt);
       break;
-      case INCLINATION_VALUES:
+      case ATTITUDE_VALUES:
         output += String(sen.get().attitude.roll) + ",";
         output += String(sen.get().attitude.pitch) + ",";
         output += String(sen.get().attitude.yaw);
@@ -588,95 +305,14 @@ String dataClass::print(sysStatus sysIn) {
           output += String(sen.get().pressure);
         }
         else {
-          output += String(pressureSim(sen.get().position.alt));
+          output += "99999.0";
         }
-      break;
-      case VDOWN_VALUE:
-        output += String(sysIn.realVDOWN);
-      break;
-      case WAYPOINT_POSITION_VALUES:
-        output += String(sysIn.nav.waypoint.lat,5) + ",";
-        output += String(sysIn.nav.waypoint.lng,5) + ",";
-        output += String(sysIn.nav.waypoint.alt);
-      break;
-      case WAYPOINT_SCORE:
-        if (1) {
-          navStatus navCopy = sysIn.nav;
-          double max = -1000;
-          unsigned index = 0;
-          for (int i(0); i < navCopy.waypointChoice.length; ++i) {
-            if (navCopy.waypointChoice.score[i] > max) {
-              max = navCopy.waypointChoice.score[i];
-              index = i;
-            }
-          }
-          output += String(navCopy.waypointChoice.score[index]);
-        }
-      break;
-      case TRAJ_VALUES:
-        output += String(sysIn.nav.sim.lat,5) + ",";
-        output += String(sysIn.nav.sim.lng,5);
-      break;
-      case DIST_TRAJ:
-        if (1) {
-          gpsCoord driftPoint;
-          driftPoint.lat = sysIn.nav.sim.lat;
-          driftPoint.lng = sysIn.nav.sim.lng;
-          double distTraj = distanceTo(driftPoint,sysIn.nav.waypoint);
-          output += String(distTraj);
-        }
-      break;
-      case DIST_POS:
-        {
-          gpsCoord driftPoint;
-          driftPoint.lat = sen.get().position.lat;
-          driftPoint.lng = sen.get().position.lng;
-          double distPos = distanceTo(driftPoint,sysIn.nav.waypoint);
-          output += String(distPos);
-        }
-      break;
-      case NAV_VALUES :
-        output += String(sysIn.nav.con.input) + ",";
-        output += String(sysIn.nav.con.setpoint) + ",";
-        if (1) {
-          double realSetpoint = 0;
-          if(sysIn.nav.navMode == COG) {
-            realSetpoint = -sysIn.nav.con.input+sen.get().course;
-            realSetpoint = (int((realSetpoint+360)*100.0)%36000)/100.0;
-          }
-          if (sysIn.nav.navMode == HEADING_ABSOLUTE)  {
-            realSetpoint = -sysIn.nav.con.input+sen.get().attitude.yaw;
-            realSetpoint = (int((realSetpoint+360)*100.0)%36000)/100.0;
-          }
-          if (sysIn.nav.navMode == HEADING_RELATIVE or sysIn.nav.navMode == HEADING_RELATIVE_FINAL) {
-            realSetpoint = sysIn.nav.headingRelativeSetpoint;
-          }
-          output += String(realSetpoint) + ",";
-        }
-        output += String(sysIn.nav.con.output) + ",";
-        output += String(sysIn.nav.navMode) + ",";
-        output += String(sysIn.nav.projectedGroundSpeed);
       break;
       case MIX_VALUES:
         output += String(sysIn.mix.dir) + ",";
         output += String(sysIn.mix.brk) + ",";
         output += String(sysIn.mix.acc) + ",";
         output += String(sysIn.mix.dep);
-      break;
-      case SERVO_VALUES:
-        output += String(int(sysIn.ser.l)) +  ",";
-        output += String(int(sysIn.ser.r)) + ",";
-        output += String(int(sysIn.ser.x1)) + ",";
-        output += String(int(sysIn.ser.x2));
-      break;
-      case WIND_VALUES:
-        output += String(sysIn.nav.windSpeedGFS) + ",";
-        output += String(sysIn.nav.windDirGFS) + ",";
-        output += String(sysIn.nav.windSpeedMeasured) + ",";
-        output += String(sysIn.nav.windDirMeasured);
-      break; 
-      case FACTOR_VALUE:
-        output += String(sysIn.nav.spiralFactor);
       break;
       case BAT_VALUES:
         output += String(bat.get().voltage) + ",";

@@ -41,6 +41,8 @@
 #define INGNITOR_PIN    7
 #define BUZZER_PIN      8
 
+#define BAT_PIN        A0
+
 #define LED_A_PIN     3 
 #define LED_B_PIN     4
 

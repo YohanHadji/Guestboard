@@ -1,25 +1,18 @@
-#ifndef MIXER
-#define MIXER
+#ifndef MIXER_H
+#define MIXER_H
 
 #include "Arduino.h"
 #include "CONFIG.h"
-#include "SERVO.h"
+#include "OUTPUT.h"
 #include "COMMAND.h"
-#include "NAVIGATION.h"
+#include "SENSOR.h"
 
 enum FLIGHTMODE {
-INITIALIZE = 0, 
-READYSTEADY, 
-ASCENT, 
-DESCENT, 
-GLIDING, 
-GLIDINGAUTO, 
-SPIRAL,
-GLIDINGRECOVER, 
-GLIDINGNOGPS, 
-ABORT,
-CONFIGERROR,
-FLYBYWIRE
+  INITIALIZE = 0, 
+  READYSTEADY, 
+  ASCENT, 
+  DESCENT, 
+  GLIDING
 };
 
 enum ERRORCODE {
@@ -32,15 +25,6 @@ enum ERRORCODE {
   TIMEWAIT
 };
 
-enum RECOVERYPHASE {
-  STALLRAMP = 0,
-  STALL,
-  BRAKERAMP,
-  BRAKE,
-  HANDSUPRAMP,
-  HANDSUP
-};
-
 struct sysStatus {
   timeCode time;
   timeCode timeTransition;
@@ -48,16 +32,10 @@ struct sysStatus {
   bool initialised;
   bool separated;
   bool deployed;
-  bool wingOpened;
-  bool nearGround;
-  double realVDOWN;
-  bool trimDone;
-  RECOVERYPHASE recoveryPhase;
-  double gainDivider;
+  bool chuteOpened;
 
   mixStatus mix;
-  navStatus nav;
-  serStatus ser;
+  outStatus out;
 };
 
 class mixClass {
@@ -70,19 +48,7 @@ class mixClass {
     double dir;
     double dep;
     double brk;
-    bool isAutonomous(sysStatus);
     mixStatus mixInit(sysStatus);
-    mixStatus mixreadySteady(sysStatus);
-    mixStatus mixAscent(sysStatus);
-    mixStatus mixDescent(sysStatus);
-    mixStatus mixGliding(sysStatus);
-    mixStatus mixGlidingAuto(sysStatus);  
-    mixStatus mixSpiral(sysStatus);  
-    mixStatus mixGlidingRecover(sysStatus);
-    mixStatus mixGlidingNoGPS(sysStatus);
-    mixStatus mixConfigError(sysStatus);
-    mixStatus mixAbort(sysStatus);
-    mixStatus mixFlyByWire(sysStatus);
 };
 
 class sysClass {
@@ -93,19 +59,13 @@ class sysClass {
     void setFlightMode(FLIGHTMODE);
     void setTransitionTime(timeCode);
     void setTime(timeCode);
-    void setRealVDOWN(double);
     void setReady();
     void separate();
     void deploy();
-    void openWing();
-    void isNearGround();
-    void trimIsDone();
-    void setRecoveryPhase(RECOVERYPHASE phaseIn);
-    void setGainDivider(double gainIn);
+    void openChute();
 
     mixClass mix;
-    navClass nav;
-    serClass ser;
+    outClass out;
 
   private: 
     FLIGHTMODE flightMode; 
@@ -114,12 +74,7 @@ class sysClass {
     bool initialised;
     bool separated;
     bool deployed;
-    bool wingOpened;
-    bool nearGround;
-    double realVDOWN;
-    bool trimDone;
-    RECOVERYPHASE recoveryPhase;
-    double gainDivider;
+    bool chuteOpened;
 };
 
 #endif 

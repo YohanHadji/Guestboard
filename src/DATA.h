@@ -1,16 +1,14 @@
-#ifndef DATA
-#define DATA
+#ifndef DATA_H
+#define DATA_H
 
 #include <Arduino.h>
 #include <String.h>
 #include <SD.h>
 #include <SPI.h>
 #include "CONFIG.h"
-#include "NAVIGATION.h"
 #include "COMMAND.h"
 #include "MIXER.h"
-#include "../R2HomeTelemetryInterface/PacketDefinition.h"
-
+#include "../ERT_RF_Protocol_Interface/PacketDefinition.h"
 
 struct batStatus {
     double voltage;
@@ -43,25 +41,17 @@ enum dataListString {
     INITIALIZED,
     SEPARATED,
     DEPLOYED,
-    WING_OPEN,
+    CHUTE_OPEN,
     SEN_HEALTH,                 //fixType, hdop, satNumber
     POSITION_VALUES,            //Lat, Lon, Alt
-    INCLINATION_VALUES,         //Roll, Pitch, Yaw
+    ATTITUDE_VALUES,         //Roll, Pitch, Yaw
     SPEED_VALUES,               //X, Y, Z
     COURSE, 
     TEMPERATURE,
     PRESSURE, 
     VDOWN_VALUE,
-    WAYPOINT_POSITION_VALUES,   //Lat, Lon, Alt
-    WAYPOINT_SCORE,
-    TRAJ_VALUES,                //Lat, Lon
-    DIST_TRAJ,
-    DIST_POS,
-    NAV_VALUES,                 //input, setpoint, output
     MIX_VALUES,                 //dir, acc, dep
-    SERVO_VALUES,               //l, r, x1, x2
-    WIND_VALUES,
-    FACTOR_VALUE,
+    OUTPUT_VALUES,               //l, r, x1, x2
     BAT_VALUES,
 };
 
@@ -70,15 +60,12 @@ class dataClass {
   public: 
     dataClass(dataListString list[], int);
     dataStruct get();
-    void setWaypoint(gpsCoord);
     bool update();
     void save(sysStatus);
     void send(sysStatus);
     void begin();
     String print(sysStatus);
-    String printWaypoint(sysStatus);
     String printStarterString();
-    String printStarterStringWaypoint(sysStatus sysIn);
     bool isUpdated();
 
     senClass sen;
@@ -90,11 +77,8 @@ class dataClass {
     bool firstTimeSave;
     File dataFile;
     File dataFileLowRate; 
-    File missionFile;
-    File waypointLogFile;
     char namebuff[35]; 
     char namebuffLowRate[35];
-    char namebuffWaypointLog[35];
     dataListString list[35];
     static void dateTime(uint16_t* date, uint16_t* time);
     void floatToByte(float f, byte *b);
@@ -102,8 +86,5 @@ class dataClass {
     void int16ToByte(int16_t intIn, byte *b);
     void int8ToByte(int8_t intIn, byte *b); 
 };
-
-waypointData readWaypoint();
-gpsCoord chooseWaypoint(gpsCoord waypointData[]);
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef PHY
-#define PHY
+#ifndef PHY_H
+#define PHY_H
 
 #include "Arduino.h"
 #include "CONFIG.h"

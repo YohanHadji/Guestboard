@@ -1,12 +1,11 @@
-#ifndef COMMAND
-#define COMMAND
+#ifndef COMMAND_H
+#define COMMAND_H
 
 #include "Arduino.h"
 #include "CONFIG.h"
 #include "Capsule.h"
-#include "sbus.h"
 #include "stdlib.h"
-#include <functional>
+// #include <functional>
 
 enum TLM_CMD {
   NO_CMD = 0,
@@ -24,7 +23,6 @@ enum TLM_CMD {
 };
 
 struct cmdStatus {
-  double ch[8];
   TLM_CMD tlmCmd;
 };
 
@@ -38,8 +36,6 @@ class cmdClass {
     Capsule<cmdClass> telemetryRadio;
     void handleTlmCmd(uint8_t , uint8_t*, uint32_t);
   private:
-    SbusRx rx;
-    double ch[8];
     TLM_CMD tlmCmd;
     String buff = "";
     bool newCmd = false;

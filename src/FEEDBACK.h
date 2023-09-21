@@ -1,5 +1,5 @@
-#ifndef FEEDBACK
-#define FEEDBACK
+#ifndef FEEDBACK_H
+#define FEEDBACK_H
 
 #include "Arduino.h"
 #include "CONFIG.h"
@@ -35,11 +35,6 @@ class buzzerClass {
     void buzzerInitEnd();
     void buzzerChangeFlightMode();
     void buzzerBeep(typeBeeping type);
-    void noWindFile();
-    void noWaypoint();
-    void waypointOutOfRange();
-    void positionOutOfRange();
-    void timeOutOfRange();
     void beep();
 
     private:
@@ -54,23 +49,15 @@ class ledClass {
     ledClass();
     void switchColor(int flightMode);
     void update();
-    void noWindFile();
-    void noWaypoint();
-    void waypointOutOfRange();
-    void positionOutOfRange();
-    void timeOutOfRange();
-    void timeWait();
-
     
     private:
     enum color {red = 1, green, blue, yellow, purple, cyan, white};
     void set(int r, int g, int b);
     rgbColor currentColor;
-    Adafruit_NeoPixel strip;
+    // Adafruit_NeoPixel strip;
     unsigned durationOn, durationOff, timeOn, timeOff;
     bool isOn;
     bool boolColor;
-    void colorWipe(uint32_t color);
 };
 
 

@@ -1,18 +1,10 @@
-#ifndef SENSOR
-#define SENSOR
+#ifndef SENSOR_H
+#define SENSOR_H
 
-#include "mtiSensor/xsens_mti.h"      // main library
-#include "mtiSensor/xsens_utility.h"  // needed for quaternion conversion function
 #include "Arduino.h"
 #include "CONFIG.h"
-#include <movingAvg.h>
 
 struct senSettings {
-  int heatingTime; // sec
-  int noRotationTime; // sec
-  int fusionFilter; // 11 or 13
-  bool ahs; // true or false
-  bool inRunCompassCalibration; // true or false
 };
 
 struct timeCode {
@@ -69,25 +61,23 @@ struct timeStruct {
 
 struct senStatus {
   timeStruct time;
+  timeStruct externalTime;
   gpsCoord position;
   xyzCoord speed; 
   double twoDSpeed;
   double threeDSpeed;
   rpyCoord attitude;
-  double rotationSpeed;
   gpsStatus gps;
-  double temperature, course;
+  double course;
+  double temperature;
   uint32_t pressure;
   bool valid;
   bool updated;
-  double verticalSpeedAvgData;
-  double rotationSpeedAvgData;
+  elapsedMillis msSinceMidnight;
 };
 
 double timeDiff(timeCode time1, timeCode time2);
 
-//void receive(XsensEventFlag_t event, XsensEventData_t *mtdata);
-//void send(uint8_t *data, uint16_t length);
 
 class senClass {
   public:
@@ -96,9 +86,6 @@ class senClass {
     senStatus get();
     bool isValid();
     void begin(senSettings settings);
-    //void receive(XsensEventFlag_t event, XsensEventData_t *mtdata);
-    //void send(uint8_t *data, uint16_t length);
-    friend void receive(XsensEventFlag_t event, XsensEventData_t *mtdata);
     friend void send(uint8_t *data, uint16_t length);
     double timeDiff(timeCode time1, timeCode time2);
     void resetVerticalSpeed();
@@ -111,14 +98,9 @@ class senClass {
     xyzCoord speed;
     rpyCoord attitude;
     gpsStatus gps;
+    double course;
     double temperature;
     uint32_t pressure;
-    double rotationSpeed;
-    double computeRotationSpeed(double, double);
-    double course;
-    double verticalSpeedAvgData;
-    double rotationSpeedAvgData;
-    xsens_interface_t sen_interface;
     bool updated;
     bool valid;
 };
