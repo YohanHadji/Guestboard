@@ -1,12 +1,12 @@
 #include "TELECOM.h"
 
-static PacketAvUplink lastPacket;
+static av_uplink_t lastPacket;
 static bool newCmdReceived = false;
 
 comClass::comClass()
-{ 
-  lastPacket.cmdId = DEFAULT;
-  lastPacket.cmdValue = 0x00;
+{
+  lastPacket.order_id = 0x00;
+  lastPacket.order_value = 0x00;
 }
 
 void comClass::update() {
@@ -119,18 +119,18 @@ void comClass::sendTelemetry(uint8_t packetId, uint8_t *data, uint32_t len) {
 bool comClass::isUpdated() {
   if (newCmdReceived) {
     newCmdReceived = false;
-    cmdId = (CMD_ID)lastPacket.cmdId;
-    cmdValue = lastPacket.cmdValue;
+    cmdId = (CMD_ID)lastPacket.order_id;
+    cmdValue = lastPacket.order_value;
     return true;
   }
   return false;
 }
 
 void comClass::resetCmd() {
-  cmdId = DEFAULT;
+  cmdId = (CMD_ID)(0);
   cmdValue = 0x00;
-  lastPacket.cmdId = DEFAULT;
-  lastPacket.cmdValue = 0x00;
+  lastPacket.order_id = 0x00;
+  lastPacket.order_value = 0x00;
 }
 
 void handleLoRaCapsuleUplink(uint8_t packetId, uint8_t *dataIn, uint32_t len) {

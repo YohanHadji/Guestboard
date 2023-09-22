@@ -41,55 +41,55 @@ void dataClass::send(sysStatus sysIn) {
   senStatus senIn;
   senIn = sen.get();
 
-  PacketAVDownlink packetToSend;
+  av_downlink_t packetToSend;
 
   packetToSend.timestamp = senIn.msSinceMidnight;
-  packetToSend.flightMode = sysIn.flightMode;
+  packetToSend.av_state = sysIn.flightMode;
 
-  packetToSend.lat = senIn.position.lat;
-  packetToSend.lng = senIn.position.lng;
-  packetToSend.alt = senIn.position.alt;
+  packetToSend.gnss_lat = senIn.position.lat;
+  packetToSend.gnss_lon = senIn.position.lng;
+  packetToSend.gnss_alt = senIn.position.alt;
 
-  packetToSend.positionAge = senIn.age;
+  // packetToSend.positionAge = senIn.age;
 
-  packetToSend.engineStatus.pressureN2O = senIn.prop.pressureN2O;
-  packetToSend.engineStatus.pressureFuel = senIn.prop.pressureFuel;
-  packetToSend.engineStatus.pressureChamber = senIn.prop.pressureChamber;
-  packetToSend.engineStatus.temperatureN2O = senIn.prop.temperatureN2O;
+  packetToSend.N2O_pressure = senIn.prop.pressureN2O;
+  packetToSend.fuel_pressure = senIn.prop.pressureFuel;
+  packetToSend.chamber_pressure = senIn.prop.pressureChamber;
+  packetToSend.N2O_temp = senIn.prop.temperatureN2O;
 
   if (sysIn.out.ventN2O == VENT_N2O_OPEN) {
-    packetToSend.engineStatus.solenoidVentN2O = OPEN;
+    packetToSend.engine_state.vent_N2O = INACTIVE;
   }
   else {
-    packetToSend.engineStatus.solenoidVentN2O = CLOSED;
+    packetToSend.engine_state.vent_N2O = ACTIVE;
   }
 
   if (sysIn.out.ventFuel == VENT_FUEL_OPEN) {
-    packetToSend.engineStatus.solenoidVentFuel = OPEN;
+    packetToSend.engine_state.vent_fuel = INACTIVE;
   }
   else {
-    packetToSend.engineStatus.solenoidVentFuel = CLOSED;
+    packetToSend.engine_state.vent_fuel = ACTIVE;
   }
 
   if (sysIn.out.pressurizer == PRESSURIZER_OPEN) {
-    packetToSend.engineStatus.solenoidPressure = OPEN;
+    packetToSend.engine_state.pressurize = ACTIVE;
   }
   else {
-    packetToSend.engineStatus.solenoidPressure = CLOSED;
+    packetToSend.engine_state.pressurize = INACTIVE;
   }
 
   if (sysIn.out.servoN2O == SERVO_N2O_OPEN) {
-    packetToSend.engineStatus.servoN2O = OPEN;
+    packetToSend.engine_state.servo_N2O = ACTIVE;
   }
   else {
-    packetToSend.engineStatus.servoN2O = CLOSED;
+    packetToSend.engine_state.servo_N2O = INACTIVE;
   }
 
   if (sysIn.out.servoFuel == SERVO_FUEL_OPEN) {
-    packetToSend.engineStatus.servoFuel = OPEN;
+    packetToSend.engine_state.servo_fuel = ACTIVE;
   }
   else {
-    packetToSend.engineStatus.servoFuel = CLOSED;
+    packetToSend.engine_state.servo_fuel = INACTIVE;
   }
 
   com.sendTelemetry(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packetToSend, sizeof(packetToSend));

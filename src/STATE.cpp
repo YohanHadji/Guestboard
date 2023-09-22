@@ -326,28 +326,28 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
 
   switch(com.cmdId) {
 
-    case CMD_ID::AV_CMD_VALVE_FUEL:
+    case CMD_ID::AV_CMD_SERVO_FUEL:
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
-      if (com.cmdValue == OPEN) {
+      if (com.cmdValue == ACTIVE) {
         currentMix.servoFuel = SERVO_FUEL_OPEN;
       }
-      else if (com.cmdValue == CLOSED) {
+      else if (com.cmdValue == INACTIVE) {
         currentMix.servoFuel = SERVO_FUEL_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
     }
     break;
 
-    case CMD_ID::AV_CMD_VALVE_N2O:
+    case CMD_ID::AV_CMD_SERVO_N2O:
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
-      if (com.cmdValue == OPEN) {
+      if (com.cmdValue == ACTIVE) {
         currentMix.servoN2O = SERVO_N2O_OPEN;
       }
-      else if (com.cmdValue == CLOSED) {
+      else if (com.cmdValue == INACTIVE) {
         currentMix.servoN2O = SERVO_N2O_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
@@ -358,10 +358,10 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
-      if (com.cmdValue == OPEN) {
+      if (com.cmdValue == ACTIVE) {
         currentMix.ventFuel = VENT_FUEL_OPEN;
       }
-      else if (com.cmdValue == CLOSED) {
+      else if (com.cmdValue == INACTIVE) {
         currentMix.ventFuel = VENT_FUEL_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
@@ -374,26 +374,26 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
       mixStatus currentMix = sys.mix.get();
 
       // "OPEN" is the value transmitted by GS
-      if (com.cmdValue == OPEN) {
+      if (com.cmdValue == ACTIVE) {
         // VENT_N2O_OPEN is the logic level in CONFIG.h to open the valve
-        currentMix.ventN2O = VENT_N2O_OPEN;
+        currentMix.ventN2O = true;
       }
-      else if (com.cmdValue == CLOSED) {
-        currentMix.ventN2O = VENT_N2O_CLOSED;
+      else if (com.cmdValue == INACTIVE) {
+        currentMix.ventN2O = false;
       }
       sys.mix.setManualMemory(currentMix);
     }
     break;
 
-    case CMD_ID::MANUAL:
-    {
-      flightModeOut = FLIGHTMODE::MANUAL_MODE;
-      mixStatus currentMix = sys.mix.get();
-      sys.mix.setManualMemory(currentMix);
-    }
-    break;
+    // case CMD_ID::MANUAL:
+    // {
+    //   flightModeOut = FLIGHTMODE::MANUAL_MODE;
+    //   mixStatus currentMix = sys.mix.get();
+    //   sys.mix.setManualMemory(currentMix);
+    // }
+    // break;
 
-    case CMD_ID::ARMED:
+    case CMD_ID::AV_CMD_ARM:
     {
       if (flightModeIn == FLIGHTMODE::READYSTEADY_MODE) {
         flightModeOut = FLIGHTMODE::ARMED_MODE;
@@ -404,7 +404,7 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     }
     break;
 
-    case CMD_ID::PRESSURISED:
+    case CMD_ID::AV_CMD_PRESSURIZE:
     {
       if (flightModeIn == FLIGHTMODE::ARMED_MODE) {
         flightModeOut = FLIGHTMODE::PRESSURED_MODE;
@@ -415,7 +415,7 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     }
     break;
 
-    case CMD_ID::IGNITION:
+    case CMD_ID::AV_CMD_IGNITION:
     {
       if (flightModeIn == FLIGHTMODE::PRESSURED_MODE) {
         flightModeOut = FLIGHTMODE::IGNITER_MODE;
@@ -426,7 +426,7 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     }
     break;
 
-    case CMD_ID::ABORT:
+    case CMD_ID::AV_CMD_ABORT:
       flightModeOut = FLIGHTMODE::ABORT_MODE;
     break;
 
