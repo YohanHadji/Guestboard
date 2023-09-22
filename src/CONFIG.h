@@ -7,6 +7,8 @@
 
 #define TLM_MONITOR     false // Show telemetry on serial monitor 
 
+#define SENSOR_UPDATE_RATE 1000.0 // Sensor update rate (in Hz)
+
 #define TLM_MAIN        true  // Send telemetry on main telem port 
 #define TLM_MAIN_RATE       0.25    // Rate of telemetry sent to radiosonde (in Hz)
 
@@ -40,22 +42,25 @@
 #define PROPSENSOR_I2C_PORT Wire2
 #define PROPSENSOR_I2C_ADDR 0x68
 
+#define LORA_DOWNLINK_PORT  SPI
+#define LORA_UPLINK_PORT    SPI1
+
 // MISC WIRING 
-#define VENT_N2O_PIN    1
-#define VENT_FUEL_PIN   2    
-#define PRESSURIZER_PIN 3
-#define SOLENOID_4_PIN  4
+#define VENT_N2O_PIN        1
+#define VENT_FUEL_PIN       2    
+#define PRESSURIZER_PIN     3
+#define SOLENOID_4_PIN      4
 
 #define SERVO_N2O_PIN       5
 #define SERVO_FUEL_PIN      6
 
-#define IGNITOR_PIN    7
-#define BUZZER_PIN      8
+#define IGNITOR_PIN         7
+#define BUZZER_PIN          8
 
-#define BAT_PIN        A0
+#define BAT_PIN             A0
 
-#define LED_A_PIN     3 
-#define LED_B_PIN     4
+#define LED_A_PIN           3 
+#define LED_B_PIN           4
 
 // LOGIC LEVELS 
 #define VENT_N2O_OPEN       HIGH

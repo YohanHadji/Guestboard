@@ -18,6 +18,10 @@ bool senClass::update() {
             position.lat = gpsMain.location.lat();
             position.lng = gpsMain.location.lng();
             position.alt = gpsMain.altitude.meters();
+            // TODO: Verify that this way to note the time is correct
+            // It might be jumping a bit due to the delay to transmit 
+            // one full NMEA message. In that case we would only note time once
+            // at initialisation for example and then use elapsed ms to know the time
             msSinceMidnight = gpsMain.time.value()*10.0+gpsMain.time.age();
             time.isValid = gpsMain.time.isValid();
             // gps.fixType = gpsMain.fixType();
@@ -29,6 +33,10 @@ bool senClass::update() {
             position.lat = gpsAux.location.lat();
             position.lng = gpsAux.location.lng();
             position.alt = gpsAux.altitude.meters();
+            // TODO: Verify that this way to note the time is correct
+            // It might be jumping a bit due to the delay to transmit 
+            // one full NMEA message. In that case we would only note time once
+            // at initialisation for example and then use elapsed ms to know the time
             msSinceMidnight = gpsAux.time.value()*10.0+gpsAux.time.age();
             time.isValid = gpsAux.time.isValid();
             // gps.fixType = gpsAux.fixType();
@@ -40,21 +48,21 @@ bool senClass::update() {
 
     static unsigned long lastUpdate = 0;
     if (((millis() - lastUpdate) >= 1.0/SENSOR_UPDATE_RATE) or positionUpdated) {
-        lastUpdate = millis();
 
+        lastUpdate = millis();
         positionUpdated = false;
-        time.hour = msSinceMidnight/36000000;
-        time.minute = (msSinceMidnight%36000000)/600000;
-        time.second = ((msSinceMidnight%36000000)%600000)/10000;
-        time.nanosecond = (((msSinceMidnight%36000000)%600000)%10000)*100000;
-        time.code.second = time.second;
+
+        time.hour = msSinceMidnight/3600000;
+        time.minute = (msSinceMidnight%3600000)/60000;
+        time.second = ((msSinceMidnight%3600000)%60000)/1000;
+        time.nanosecond = (((msSinceMidnight%3600000)%60000)%1000)*100000;
+        time.code.second = msSinceMidnight/1000;
         time.code.nanosecond = time.nanosecond;
 
         baro.read();
         prop.read();
         return true;
     }
-
     return false;
 }
 
@@ -67,7 +75,10 @@ senClass::senClass()
 
 void senClass::begin(senSettings settings) {
     Serial.begin(115200);
-
+    GPS_MAIN_PORT.begin(GPS_MAIN_BAUD);
+    GPS_AUX_PORT.begin(GPS_AUX_BAUD);
+    baro.begin();
+    prop.begin();
     config(settings);
 }
 
