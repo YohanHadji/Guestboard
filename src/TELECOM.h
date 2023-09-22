@@ -9,11 +9,11 @@
 #include <LoRa.h>
 // #include <functional>
 
-static void handleLoRaUplink(int packetSize);
-static void handleLoRaCapsuleUplink(uint8_t packetId, uint8_t *dataIn, uint32_t len); 
+void handleLoRaUplink(int packetSize);
+void handleLoRaCapsuleUplink(uint8_t packetId, uint8_t *dataIn, uint32_t len); 
 
-static void handleLoRaDownlink(int packetSize);
-static void handleLoRaCapsuleDownlink(uint8_t packetId, uint8_t *dataIn, uint32_t len); 
+void handleLoRaDownlink(int packetSize);
+void handleLoRaCapsuleDownlink(uint8_t packetId, uint8_t *dataIn, uint32_t len); 
 
 static LoopbackStream LoRaDownlinkBuffer(1024);
 static LoopbackStream LoRaUplinkBuffer(1024);
