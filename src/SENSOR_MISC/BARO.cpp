@@ -8,7 +8,7 @@ barClass::barClass() {
 void barClass::begin() {
 }
 
-void barClass::update() {
+void barClass::read() {
     temperature = 0;
     pressure = 0;
 }

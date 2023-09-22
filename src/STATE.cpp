@@ -12,6 +12,7 @@ void uav::compute() {
   // Run the state machine and check if there is a transition to another flight mode
   oldFlightMode = sys.get().flightMode;
   newFlightMode = flightState(); 
+
   sys.setTime(data.sen.get().time.code);
   sys.setFlightMode(newFlightMode);
 
@@ -51,6 +52,11 @@ FLIGHTMODE uav::flightState() {
 
   if (data.com.isUpdated()) {
     flightModeOut = executeCmd(flightModeIn,data.com.get());
+    
+    // This is NOT "required", but safer. We remove the command from the memory, 
+    // so that there is ABSOLUTELY no way to execute it twice if somehow the 
+    // "isUpdated" bit of data.com was flipped by mistake by a cosmic ray. 
+    data.com.resetCmd();
   }
 
   else { // Depending on which flight mode, various checks are carried out
@@ -107,6 +113,7 @@ FLIGHTMODE uav::flightState() {
     // Transition time is used all over the programm to know exactly when we did the last mode transition
     sys.setTransitionTime(sys.get().time);
   }
+
   led.switchColor(sys.get().flightMode);
 
   return flightModeOut;
@@ -120,12 +127,9 @@ FLIGHTMODE uav::flightInit() {
 
   if (data.get().sen.valid) {
     if (!sys.isInitialised()) {
-      sys.setFlightMode(FLIGHTMODE::READYSTEADY_MODE);
+      sys.setReady();
     }
-    else {
-      flightModeOut = FLIGHTMODE::READYSTEADY_MODE;
-    }
-    sys.setReady();
+    flightModeOut = FLIGHTMODE::READYSTEADY_MODE;
   }
   return flightModeOut;
 }
@@ -231,7 +235,7 @@ FLIGHTMODE uav::shutdown() {
   return flightModeOut;
 }
 
-// Ascent mode, if Z speed is lower than VUP go back to readysteady mode, if we reach the separation altitude, separate.
+// Ascent mode, if Z speed is lower than VDOWN go to descent mode.
 FLIGHTMODE uav::flightAscent() {
 
   FLIGHTMODE flightModeOut;
@@ -248,7 +252,7 @@ FLIGHTMODE uav::flightAscent() {
   return flightModeOut;
 }
 
-// Descent mode, if Z speed is higher than VDOWN go back to ready mode and deploy wing if needed.
+// Descent mode, if Z speed is higher than VDOWN go back to ascent mode. Otherwise we deploy chute if needed.
 FLIGHTMODE uav::flightDescent() {
 
   FLIGHTMODE flightModeOut;
@@ -260,7 +264,7 @@ FLIGHTMODE uav::flightDescent() {
   }
   
   if (data.get().sen.speed.z > VDOWN) {
-    flightModeOut = FLIGHTMODE::READYSTEADY_MODE;
+    flightModeOut = FLIGHTMODE::ASCENT_MODE;
   }
 
   // We have two differents deployment mode, one using a target altitude, and one using a timer
@@ -317,7 +321,9 @@ FLIGHTMODE uav::abort() {
 }
 
 FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
+
   FLIGHTMODE flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
+
   switch(com.cmdId) {
 
     case CMD_ID::AV_CMD_VALVE_FUEL:
@@ -366,7 +372,10 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
     {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
+
+      // "OPEN" is the value transmitted by GS
       if (com.cmdValue == OPEN) {
+        // VENT_N2O_OPEN is the logic level in CONFIG.h to open the valve
         currentMix.ventN2O = VENT_N2O_OPEN;
       }
       else if (com.cmdValue == CLOSED) {

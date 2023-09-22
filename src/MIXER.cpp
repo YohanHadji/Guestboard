@@ -101,12 +101,23 @@ mixStatus mixClass::compute(sysStatus sysIn) {
   }
   ventN2O = mixOut.ventN2O;
   ventFuel = mixOut.ventFuel;
-  pressurizer = mixOut.pressurizer;
   solenoid4 = mixOut.solenoid4;
   servoN2O = mixOut.servoN2O;
   servoFuel = mixOut.servoFuel;
-  ignitor = mixOut.ignitor;
-  buzzer = mixOut.buzzer;
+
+  // Safety feature. If mode wasn't ARMED, we force the ignitor and pressurize off.
+  // Otherwise, we force the buzzer to be on.
+
+  if (sysIn.flightMode != FLIGHTMODE::ARMED_MODE) {
+    ignitor = !IGNITOR_ACTIVE;
+    pressurizer = PRESSURIZER_CLOSED;
+    buzzer = mixOut.buzzer;
+  } else {
+    ignitor = mixOut.ignitor;
+    pressurizer = mixOut.pressurizer;
+    buzzer = BUZZER_ACTIVE;
+  }
+
   return mixOut;
 }
 

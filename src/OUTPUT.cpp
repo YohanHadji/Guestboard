@@ -14,6 +14,8 @@ outClass::outClass()
 
 // Transform the data in a way the servo motor can compute them
 outStatus outClass::compute(mixStatus mixIn) {
+  // This function might seem useless, it's a rest from the R2HOME code structure where
+  // computation was required between the mix result (values between -100 and 100) and servo values
   outStatus outOut;
   ventN2O = mixIn.ventN2O;
   ventFuel = mixIn.ventFuel;

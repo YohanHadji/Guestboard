@@ -20,13 +20,13 @@ void comClass::update() {
 
 void comClass::begin() {
   {
-    SPI1.begin();
-    SPI1.setMISO(LORA_DOWNLINK_MISO);
-    SPI1.setMOSI(LORA_DOWNLINK_MOSI);
-    SPI1.setSCK(LORA_DOWNLINK_SCK);
+    LORA_DOWNLINK_PORT.begin();
+    LORA_DOWNLINK_PORT.setMISO(LORA_DOWNLINK_MISO);
+    LORA_DOWNLINK_PORT.setMOSI(LORA_DOWNLINK_MOSI);
+    LORA_DOWNLINK_PORT.setSCK(LORA_DOWNLINK_SCK);
 
     LoRaDownlink.setPins(LORA_DOWNLINK_CS, LORA_DOWNLINK_RST, LORA_DOWNLINK_INT0);
-    LoRaDownlink.setSPI(SPI1);
+    LoRaDownlink.setSPI(LORA_DOWNLINK_PORT);
     
     if (!LoRaDownlink.begin(LORA_DOWNLINK_FREQ)) {
       if (DEBUG) {
@@ -55,14 +55,14 @@ void comClass::begin() {
     LoRaDownlink.disableInvertIQ();
   #endif
 
-    LoRaDownlink.receive();  
+    // LoRaDownlink.receive();  
     //LoRaDownlink.onReceive(handleLoRaDownlink);
   }
   
   {
-    SPI.begin(); 
+    LORA_UPLINK_PORT.begin(); 
     LoRaUplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_INT0);
-    LoRaUplink.setSPI(SPI);
+    LoRaUplink.setSPI(LORA_UPLINK_PORT);
     
     if (!LoRaUplink.begin(LORA_UPLINK_FREQ)) {
       if (DEBUG) {
@@ -124,6 +124,13 @@ bool comClass::isUpdated() {
     return true;
   }
   return false;
+}
+
+void comClass::resetCmd() {
+  cmdId = DEFAULT;
+  cmdValue = 0x00;
+  lastPacket.cmdId = DEFAULT;
+  lastPacket.cmdValue = 0x00;
 }
 
 void handleLoRaCapsuleUplink(uint8_t packetId, uint8_t *dataIn, uint32_t len) {

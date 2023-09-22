@@ -96,11 +96,8 @@ class senClass {
     void begin(senSettings settings);
     friend void send(uint8_t *data, uint16_t length);
     double timeDiff(timeCode time1, timeCode time2);
-    void resetVerticalSpeed();
   private:
     void config(senSettings settings);
-    void setNoRotation(int16_t timeForNoRotation);
-    void printReceived();
 
     // GLOBAL ESTIMATOR VALUES // 
     timeStruct time;

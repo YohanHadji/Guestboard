@@ -41,6 +41,7 @@ class comClass {
     bool isUpdated();
     void begin();
     void sendTelemetry(uint8_t packetId, uint8_t *dataOut, uint32_t len);
+    void resetCmd();
   private:
     CMD_ID cmdId;
     uint8_t cmdValue;
