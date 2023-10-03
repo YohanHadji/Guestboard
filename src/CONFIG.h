@@ -120,19 +120,17 @@
 #define LORA_DOWNLINK_INVERSE_IQ   AV_DOWNLINK_INVERSE_IQ
 
 // PIN/GPIO Definition
-#define LORA_UPLINK_SCK                13
-#define LORA_UPLINK_MOSI               11
-#define LORA_UPLINK_MISO               12
-#define LORA_UPLINK_CS                 10
-#define LORA_UPLINK_INT0               22
-//#define LORA_UPLINK_INT5             39
-#define LORA_UPLINK_RST                36
+#define LORA_UPLINK_SCK                 13   
+#define LORA_UPLINK_MOSI                11
+#define LORA_UPLINK_MISO                12
+#define LORA_UPLINK_CS                  10
+#define LORA_UPLINK_INT0                9
+#define LORA_UPLINK_RST                 14
 
-#define LORA_DOWNLINK_SCK                27
-#define LORA_DOWNLINK_MOSI               26
-#define LORA_DOWNLINK_MISO               39
-#define LORA_DOWNLINK_CS                 38
-#define LORA_DOWNLINK_INT0               23
-//#define LORA_UPLINK_INT5               39
-#define LORA_DOWNLINK_RST                37
+#define LORA_DOWNLINK_SCK               27
+#define LORA_DOWNLINK_MOSI              26
+#define LORA_DOWNLINK_MISO              39
+#define LORA_DOWNLINK_CS                38
+#define LORA_DOWNLINK_INT0              40
+#define LORA_DOWNLINK_RST               37
 
