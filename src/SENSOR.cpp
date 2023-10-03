@@ -60,7 +60,12 @@ bool senClass::update() {
         time.code.nanosecond = time.nanosecond;
 
         baro.read();
-        prop.read();
+
+        static unsigned long lastPropSample = 0;
+        if ((millis() - lastPropSample) >= 1.0/PROP_SENSOR_SAMPLE_RATE) {
+            lastPropSample = millis();
+            prop.read();
+        }
         return true;
     }
     return false;

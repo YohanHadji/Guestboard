@@ -2,7 +2,6 @@
 #define PROPULSION_H
 
 #include "Arduino.h"
-#include "CONFIG.h"
 #include "MCP3427.h"
 
 struct proStatus {
@@ -19,7 +18,8 @@ class proClass {
         void begin();
         proStatus get();
     private:
-        MCP3427 adc;
+        MCP3427 adcUp;
+        MCP3427 adcDown;
         unsigned pressureN2O;
         unsigned pressureFuel;
         unsigned pressureChamber;

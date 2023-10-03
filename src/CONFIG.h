@@ -9,6 +9,8 @@
 
 #define SENSOR_UPDATE_RATE 1000.0 // Sensor update rate (in Hz)
 
+#define PROP_SENSOR_SAMPLE_RATE 10.0 // Propulsion sensor sample rate (in Hz)
+
 #define TLM_MAIN        true  // Send telemetry on main telem port 
 #define TLM_MAIN_RATE       0.25    // Rate of telemetry sent to radiosonde (in Hz)
 
@@ -39,8 +41,11 @@
 #define GPS_AUX_PORT Serial3
 #define GPS_AUX_BAUD 115200
 
-#define PROPSENSOR_I2C_PORT Wire2
-#define PROPSENSOR_I2C_ADDR 0x68
+#define PROPSENSOR_UP_I2C_PORT Wire
+#define PROPSENSOR_UP_I2C_ADDR 0x69
+
+#define PROPSENSOR_DOWN_I2C_PORT Wire
+#define PROPSENSOR_DOWN_I2C_ADDR 0x68
 
 #define LORA_DOWNLINK_PORT  SPI
 #define LORA_UPLINK_PORT    SPI1
