@@ -55,42 +55,14 @@ void dataClass::send(sysStatus sysIn) {
   packetToSend.N2O_pressure = senIn.prop.pressureN2O;
   packetToSend.fuel_pressure = senIn.prop.pressureFuel;
   packetToSend.chamber_pressure = senIn.prop.pressureChamber;
-  packetToSend.N2O_temp = senIn.prop.temperatureN2O;
+  packetToSend.tank_temp = senIn.prop.temperatureN2O;
 
-  if (sysIn.out.ventN2O == VENT_N2O_OPEN) {
-    packetToSend.engine_state.vent_N2O = INACTIVE;
-  }
-  else {
-    packetToSend.engine_state.vent_N2O = ACTIVE;
-  }
-
-  if (sysIn.out.ventFuel == VENT_FUEL_OPEN) {
-    packetToSend.engine_state.vent_fuel = INACTIVE;
-  }
-  else {
-    packetToSend.engine_state.vent_fuel = ACTIVE;
-  }
-
-  if (sysIn.out.pressurizer == PRESSURIZER_OPEN) {
-    packetToSend.engine_state.pressurize = ACTIVE;
-  }
-  else {
-    packetToSend.engine_state.pressurize = INACTIVE;
-  }
-
-  if (sysIn.out.servoN2O == SERVO_N2O_OPEN) {
-    packetToSend.engine_state.servo_N2O = ACTIVE;
-  }
-  else {
-    packetToSend.engine_state.servo_N2O = INACTIVE;
-  }
-
-  if (sysIn.out.servoFuel == SERVO_FUEL_OPEN) {
-    packetToSend.engine_state.servo_fuel = ACTIVE;
-  }
-  else {
-    packetToSend.engine_state.servo_fuel = INACTIVE;
-  }
+  // valves states
+  packetToSend.engine_state.pressurize = sysIn.out.pressurizer == PRESSURIZER_OPEN; // NO Normally Open
+  packetToSend.engine_state.servo_N2O = sysIn.out.servoN2O == SERVO_N2O_OPEN;       // NO
+  packetToSend.engine_state.servo_fuel = sysIn.out.servoFuel == SERVO_FUEL_OPEN;    // NO
+  packetToSend.engine_state.vent_N2O = sysIn.out.ventN2O == VENT_N2O_CLOSED;        // NC Normally Close
+  packetToSend.engine_state.vent_fuel = sysIn.out.ventFuel == VENT_FUEL_CLOSED;     // NC 
 
   com.sendTelemetry(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packetToSend, sizeof(packetToSend));
 }
