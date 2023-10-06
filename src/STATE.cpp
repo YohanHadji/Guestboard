@@ -29,6 +29,7 @@ void uav::output() {
   // Data save is run in last because it is the most time consuming function and we have 50ms before the next sensor packet.
   static timeCode lastSave;
   if (HIGH_RATE) {
+    // Serial.println(timeDiff(sys.get().time, lastSave));
     if (timeDiff(sys.get().time, lastSave) >= 1.0/HIGH_RATE_RATE) {
       data.save(sys.get());
       lastSave = sys.get().time;
@@ -112,6 +113,51 @@ FLIGHTMODE uav::flightState() {
   if (flightModeOut != flightModeIn) {
     // Transition time is used all over the programm to know exactly when we did the last mode transition
     sys.setTransitionTime(sys.get().time);
+    Serial.print("Switching to ");
+    switch (flightModeOut) {
+      case FLIGHTMODE::INITIALIZE_MODE:
+        Serial.println("INITIALIZE_MODE");
+      break;
+      case FLIGHTMODE::READYSTEADY_MODE:
+        Serial.println("READYSTEADY_MODE");
+      break;
+      case FLIGHTMODE::CALIBRATION_MODE:
+        Serial.println("CALIBRATION_MODE");
+      break;
+      case FLIGHTMODE::MANUAL_MODE:
+        Serial.println("MANUAL_MODE");
+      break;
+      case FLIGHTMODE::ARMED_MODE:
+        Serial.println("ARMED_MODE");
+      break;
+      case FLIGHTMODE::PRESSURED_MODE:
+        Serial.println("PRESSURED_MODE");
+      break;
+      case FLIGHTMODE::IGNITER_MODE:
+        Serial.println("IGNITER_MODE");
+      break;
+      case FLIGHTMODE::IGNITION_MODE:
+        Serial.println("IGNITION_MODE");
+      break;
+      case FLIGHTMODE::THRUST_MODE:
+        Serial.println("THRUST_MODE");
+      break;
+      case FLIGHTMODE::SHUTDOWN_MODE:
+        Serial.println("SHUTDOWN_MODE");
+      break;
+      case FLIGHTMODE::ASCENT_MODE:
+        Serial.println("ASCENT_MODE");
+      break;
+      case FLIGHTMODE::DESCENT_MODE:
+        Serial.println("DESCENT_MODE");
+      break;
+      case FLIGHTMODE::GLIDING_MODE:
+        Serial.println("GLIDING_MODE");
+      break;
+      case FLIGHTMODE::ABORT_MODE:
+        Serial.println("ABORT_MODE");
+      break;
+    }
   }
 
   led.switchColor(sys.get().flightMode);
@@ -324,6 +370,13 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
 
   FLIGHTMODE flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
 
+  if (DEBUG) {
+    Serial.print("Command received: ");
+    Serial.print(com.cmdId);
+    Serial.print(" ");
+    Serial.println(com.cmdValue);
+  }
+
   switch(com.cmdId) {
 
     case CMD_ID::AV_CMD_SERVO_FUEL:
@@ -359,10 +412,10 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
       flightModeOut = FLIGHTMODE::MANUAL_MODE;
       mixStatus currentMix = sys.mix.get();
       if (com.cmdValue == ACTIVE) {
-        currentMix.ventFuel = VENT_FUEL_OPEN;
+        currentMix.ventFuel = VENT_FUEL_CLOSED;
       }
       else if (com.cmdValue == INACTIVE) {
-        currentMix.ventFuel = VENT_FUEL_CLOSED;
+        currentMix.ventFuel = VENT_FUEL_OPEN;
       }
       sys.mix.setManualMemory(currentMix);
     }
@@ -376,10 +429,29 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
       // "OPEN" is the value transmitted by GS
       if (com.cmdValue == ACTIVE) {
         // VENT_N2O_OPEN is the logic level in CONFIG.h to open the valve
-        currentMix.ventN2O = true;
+        currentMix.ventN2O = VENT_N2O_CLOSED;
       }
       else if (com.cmdValue == INACTIVE) {
-        currentMix.ventN2O = false;
+        currentMix.ventN2O = VENT_N2O_OPEN;
+      }
+      sys.mix.setManualMemory(currentMix);
+    }
+    break;
+
+    case CMD_ID::AV_CMD_MAN_PRESSURE:
+    {
+      flightModeOut = FLIGHTMODE::MANUAL_MODE;
+      mixStatus currentMix = sys.mix.get();
+
+      // "OPEN" is the value transmitted by GS
+      if (com.cmdValue == ACTIVE) {
+        // VENT_N2O_OPEN is the logic level in CONFIG.h to open the valve
+        Serial.println("Pressurizer open");
+        currentMix.pressurizer = PRESSURIZER_OPEN;
+      }
+      else if (com.cmdValue == INACTIVE) {
+        Serial.println("Pressurizer closed");
+        currentMix.pressurizer = PRESSURIZER_CLOSED;
       }
       sys.mix.setManualMemory(currentMix);
     }
@@ -395,11 +467,11 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
 
     case CMD_ID::AV_CMD_ARM:
     {
-      if (flightModeIn == FLIGHTMODE::READYSTEADY_MODE) {
+      if (com.cmdValue == ACTIVE) {
         flightModeOut = FLIGHTMODE::ARMED_MODE;
       }
-      else {
-        flightModeOut = flightModeIn;
+      else if (com.cmdValue == INACTIVE) {
+        flightModeOut = FLIGHTMODE::MANUAL_MODE;
       }
     }
     break;
@@ -430,6 +502,10 @@ FLIGHTMODE uav::executeCmd(FLIGHTMODE flightModeIn, comStatus com) {
       flightModeOut = FLIGHTMODE::ABORT_MODE;
     break;
 
+    case CMD_ID::AV_CMD_RECOVER:
+      flightModeOut = FLIGHTMODE::INITIALIZE_MODE;
+    break;
+    
 
     default:
       flightModeOut = flightModeIn;

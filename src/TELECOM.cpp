@@ -20,7 +20,8 @@ void comClass::update() {
 
 void comClass::begin() {
   {
-    LORA_DOWNLINK_PORT.begin();
+    // LORA_DOWNLINK_PORT.begin();
+
     LORA_DOWNLINK_PORT.setMISO(LORA_DOWNLINK_MISO);
     LORA_DOWNLINK_PORT.setMOSI(LORA_DOWNLINK_MOSI);
     LORA_DOWNLINK_PORT.setSCK(LORA_DOWNLINK_SCK);
@@ -60,7 +61,12 @@ void comClass::begin() {
   }
   
   {
-    LORA_UPLINK_PORT.begin(); 
+    // LORA_UPLINK_PORT.begin(); 
+
+    LORA_UPLINK_PORT.setMISO(LORA_UPLINK_MISO);
+    LORA_UPLINK_PORT.setMOSI(LORA_UPLINK_MOSI);
+    LORA_UPLINK_PORT.setSCK(LORA_UPLINK_SCK);
+
     LoRaUplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_INT0);
     LoRaUplink.setSPI(LORA_UPLINK_PORT);
     
@@ -74,7 +80,6 @@ void comClass::begin() {
         Serial.println("Starting LoRa Uplink success!");
       }
     }
-
     
     LoRaUplink.setTxPower(LORA_UPLINK_POWER);
     LoRaUplink.setSpreadingFactor(LORA_UPLINK_SF);
@@ -106,12 +111,35 @@ comStatus comClass::get() {
 
 void comClass::sendTelemetry(uint8_t packetId, uint8_t *data, uint32_t len) {
 
+  av_downlink_t packetToSend;
+
+  memcpy(&packetToSend, data, len);
+
+  // Serial.print("Sending telemetry ");
+  // Serial.print(packetToSend.timestamp);
+  // Serial.print(" ");
+  // Serial.print(packetToSend.engine_state.pressurize);
+  // Serial.print(" ");
+  // Serial.print(packetToSend.engine_state.servo_N2O);
+  // Serial.print(" ");
+  // Serial.print(packetToSend.engine_state.servo_fuel);
+  // Serial.print(" ");
+  // Serial.print(packetToSend.engine_state.vent_N2O);
+  // Serial.print(" ");
+  // Serial.println(packetToSend.engine_state.vent_fuel);
+
   uint8_t *codedBuffer = LoRaCapsuleDownlink.encode(packetId, data, len);
   size_t codedLen = LoRaCapsuleDownlink.getCodedLen(len);
 
   LoRaDownlink.beginPacket();
   LoRaDownlink.write(codedBuffer, codedLen);
-  LoRaDownlink.endPacket();
+  LoRaDownlink.endPacket(true);
+
+  // for (int i = 0; i<codedLen; i++) {
+  //   Serial.print((int)codedBuffer[i]);
+  //   Serial.print(" ");
+  // }
+  // Serial.println();
 
   delete[] codedBuffer;
 }

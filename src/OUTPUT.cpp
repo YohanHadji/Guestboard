@@ -4,12 +4,21 @@ outClass::outClass()
 {
   PWMServoN2O.attach(SERVO_N2O_PIN, SERVO_N2O_CLOSED, SERVO_N2O_OPEN);
   PWMServoFuel.attach(SERVO_FUEL_PIN, SERVO_FUEL_CLOSED, SERVO_FUEL_OPEN);
+  
   pinMode(VENT_N2O_PIN, OUTPUT);
   pinMode(VENT_FUEL_PIN, OUTPUT);
   pinMode(PRESSURIZER_PIN, OUTPUT);
-  pinMode(SOLENOID_4_PIN, OUTPUT);
+  // pinMode(SOLENOID_4_PIN, OUTPUT);
   pinMode(IGNITOR_PIN, OUTPUT);
-  pinMode(BUZZER_PIN, OUTPUT);
+  // pinMode(BUZZER_PIN, OUTPUT);
+
+  ventN2O = false;
+  ventFuel = false;
+  pressurizer = false;
+  solenoid4 = false;
+  servoN2O = SERVO_N2O_CLOSED;
+  servoFuel = SERVO_FUEL_CLOSED;
+  ignitor = IGNITOR_INACTIVE;
 }
 
 // Transform the data in a way the servo motor can compute them
@@ -33,12 +42,15 @@ outStatus outClass::compute(mixStatus mixIn) {
 void outClass::write() {
   PWMServoN2O.write(map(servoN2O, SERVO_N2O_CLOSED, SERVO_N2O_OPEN, 0, 180));
   PWMServoFuel.write(map(servoFuel, SERVO_FUEL_CLOSED, SERVO_FUEL_OPEN, 0, 180));
+  // Serial.println(pressurizer);
+
+
   digitalWrite(VENT_N2O_PIN, ventN2O);
   digitalWrite(VENT_FUEL_PIN, ventFuel);
   digitalWrite(PRESSURIZER_PIN, pressurizer);
-  digitalWrite(SOLENOID_4_PIN, solenoid4);
+  // digitalWrite(SOLENOID_4_PIN, solenoid4);
   digitalWrite(IGNITOR_PIN, ignitor);
-  digitalWrite(BUZZER_PIN, buzzer);
+  // digitalWrite(BUZZER_PIN, buzzer);
 }
 
 outStatus outClass::get() {

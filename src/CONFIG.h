@@ -3,16 +3,16 @@
 
 //---------- CONFIG ----------//
 
-#define DEBUG           false
+#define DEBUG           true
 
-#define TLM_MONITOR     false // Show telemetry on serial monitor 
+#define TLM_MONITOR     true // Show telemetry on serial monitor 
 
 #define SENSOR_UPDATE_RATE 1000.0 // Sensor update rate (in Hz)
 
-#define PROP_SENSOR_SAMPLE_RATE 10.0 // Propulsion sensor sample rate (in Hz)
+#define PROP_SENSOR_SAMPLE_RATE 1.0 // Propulsion sensor sample rate (in Hz)
 
 #define TLM_MAIN        true  // Send telemetry on main telem port 
-#define TLM_MAIN_RATE       0.25    // Rate of telemetry sent to radiosonde (in Hz)
+#define TLM_MAIN_RATE   1.0    // Rate of telemetry sent to radiosonde (in Hz)
 
 #define HIGH_RATE       true    // High rate datalogging 
 #define HIGH_RATE_RATE  20.0    // Rate of high rate saving (in Hz)
@@ -47,32 +47,34 @@
 #define PROPSENSOR_DOWN_I2C_PORT Wire
 #define PROPSENSOR_DOWN_I2C_ADDR 0x68
 
-#define LORA_DOWNLINK_PORT  SPI
-#define LORA_UPLINK_PORT    SPI1
+#define LORA_DOWNLINK_PORT  SPI1
+#define LORA_UPLINK_PORT    SPI
 
 // MISC WIRING 
-#define VENT_N2O_PIN        1
-#define VENT_FUEL_PIN       2    
-#define PRESSURIZER_PIN     3
-#define SOLENOID_4_PIN      4
+#define VENT_N2O_PIN        2
+#define VENT_FUEL_PIN       0    
+#define PRESSURIZER_PIN     1
+#define SOLENOID_4_PIN      3
+
+// NEVER USE GPIO ONE, IT GOES ON THE SHITTY VALVE LINE
 
 #define SERVO_N2O_PIN       5
-#define SERVO_FUEL_PIN      6
+#define SERVO_FUEL_PIN      4
 
-#define IGNITOR_PIN         7
-#define BUZZER_PIN          8
+#define IGNITOR_PIN         6
+#define BUZZER_PIN          7
 
-#define BAT_PIN             A0
+// #define BAT_PIN             A0
 
-#define LED_A_PIN           3 
-#define LED_B_PIN           4
+// #define LED_A_PIN           3 
+// #define LED_B_PIN           4
 
 // LOGIC LEVELS 
-#define VENT_N2O_OPEN       HIGH
-#define VENT_N2O_CLOSED     LOW
+#define VENT_N2O_OPEN       LOW
+#define VENT_N2O_CLOSED     HIGH
 
-#define VENT_FUEL_OPEN      HIGH
-#define VENT_FUEL_CLOSED    LOW
+#define VENT_FUEL_OPEN      LOW
+#define VENT_FUEL_CLOSED    HIGH
 
 #define PRESSURIZER_OPEN    HIGH
 #define PRESSURIZER_CLOSED  LOW
@@ -80,7 +82,8 @@
 #define SOLENOID4_OPEN      HIGH
 #define SOLENOID4_CLOSED    LOW
 
-#define IGNITOR_ACTIVE      HIGH
+#define IGNITOR_ACTIVE      LOW
+#define IGNITOR_INACTIVE    HIGH
 
 #define BUZZER_ACTIVE       HIGH
 
@@ -98,7 +101,7 @@
 #define IGNITER_COUNTER     4.25
 #define IGNITION_COUNTER    1.615
 #define THRUST_COUNTER      1.0
-#define SHUTDOWN_COUNTER    1.0
+#define SHUTDOWN_COUNTER    10.0
 
 #define STEP1_DELAY_MS      265
 #define STEP2_DELAY_MS      350

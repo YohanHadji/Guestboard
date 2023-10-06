@@ -5,26 +5,28 @@
 #include "MCP3427.h"
 
 struct proStatus {
-    uint16_t pressureN2O;
-    uint16_t pressureFuel;
-    uint16_t pressureChamber;
-    float_t temperatureN2O;
+    float pressureN2O;
+    float pressureFuel;
+    float pressureChamber;
+    float temperatureN2O;
 };
 
 class proClass {
     public:
         proClass();
-        void read();
+        void readAll();
+        void readChannel(int channel);
         void begin();
         proStatus get();
     private:
         MCP3427 adcUp;
         MCP3427 adcDown;
-        unsigned pressureN2O;
-        unsigned pressureFuel;
-        unsigned pressureChamber;
-        unsigned temperatureN2O;
+        float pressureN2O;
+        float pressureFuel;
+        float pressureChamber;
+        float temperatureN2O;
 };
 
+float convertToPressure(float voltageSensor);
 
 #endif

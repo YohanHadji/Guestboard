@@ -105,16 +105,16 @@ mixStatus mixClass::compute(sysStatus sysIn) {
   servoN2O = mixOut.servoN2O;
   servoFuel = mixOut.servoFuel;
 
+  pressurizer = mixOut.pressurizer;
+
   // Safety feature. If mode wasn't ARMED, we force the ignitor and pressurize off.
   // Otherwise, we force the buzzer to be on.
 
   if (sysIn.flightMode != FLIGHTMODE::ARMED_MODE) {
-    ignitor = !IGNITOR_ACTIVE;
-    pressurizer = PRESSURIZER_CLOSED;
+    ignitor = IGNITOR_INACTIVE;
     buzzer = mixOut.buzzer;
   } else {
     ignitor = mixOut.ignitor;
-    pressurizer = mixOut.pressurizer;
     buzzer = BUZZER_ACTIVE;
   }
 
@@ -124,26 +124,26 @@ mixStatus mixClass::compute(sysStatus sysIn) {
 // The system is on ground
 mixStatus mixClass::mixInit(sysStatus sysIn) {
   mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
-  mixOut.ventN2O      = VENT_N2O_CLOSED;
-  mixOut.ventFuel     = VENT_FUEL_CLOSED;
+  mixOut.ventN2O      = VENT_N2O_OPEN;
+  mixOut.ventFuel     = VENT_FUEL_OPEN;
   mixOut.pressurizer  = PRESSURIZER_CLOSED;
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
 }
 
 mixStatus mixClass::mixReadySteady(sysStatus sysIn) {
   mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
-  mixOut.ventN2O      = VENT_N2O_CLOSED;
-  mixOut.ventFuel     = VENT_FUEL_CLOSED;
+  mixOut.ventN2O      = VENT_N2O_OPEN;
+  mixOut.ventFuel     = VENT_FUEL_OPEN;
   mixOut.pressurizer  = PRESSURIZER_CLOSED;
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
 }
@@ -156,7 +156,7 @@ mixStatus mixClass::mixCalibration(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
 }
@@ -173,7 +173,7 @@ mixStatus mixClass::mixArmed(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
 }
@@ -188,7 +188,7 @@ mixStatus mixClass::mixPressured(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = BUZZER_ACTIVE;
   return mixOut;
 }
@@ -218,7 +218,7 @@ mixStatus mixClass::mixIgnition(sysStatus sysIn) {
   mixOut.pressurizer  = PRESSURIZER_OPEN;
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
 
   if (timeDiff(sysIn.time, sysIn.timeTransition) < STEP1_DELAY_MS/1000.0) {
@@ -246,7 +246,7 @@ mixStatus mixClass::mixThrust(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_OPEN;
   mixOut.servoFuel    = SERVO_FUEL_OPEN;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
 }
@@ -261,7 +261,7 @@ mixStatus mixClass::mixShutdown(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
 }
@@ -280,7 +280,7 @@ mixStatus mixClass::mixFlightDescent(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
 }
@@ -293,7 +293,7 @@ mixStatus mixClass::mixFlightGliding(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = BUZZER_ACTIVE;
   return mixOut;
 }
@@ -306,7 +306,7 @@ mixStatus mixClass::mixAbort(sysStatus sysIn) {
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
   mixOut.servoFuel    = SERVO_FUEL_CLOSED;
-  mixOut.ignitor      = !IGNITOR_ACTIVE;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = BUZZER_ACTIVE;
   return mixOut;
 }

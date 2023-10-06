@@ -47,7 +47,12 @@ bool senClass::update() {
     }
 
     static unsigned long lastUpdate = 0;
-    if (((millis() - lastUpdate) >= 1.0/SENSOR_UPDATE_RATE) or positionUpdated) {
+    if (((millis() - lastUpdate) >= (1000.0/SENSOR_UPDATE_RATE)) or positionUpdated) {
+        
+        if (DEBUG) {
+            // Serial.print("Looptime: ");
+            // Serial.println(millis() - lastUpdate);
+        }
 
         lastUpdate = millis();
         positionUpdated = false;
@@ -55,16 +60,20 @@ bool senClass::update() {
         time.hour = msSinceMidnight/3600000;
         time.minute = (msSinceMidnight%3600000)/60000;
         time.second = ((msSinceMidnight%3600000)%60000)/1000;
-        time.nanosecond = (((msSinceMidnight%3600000)%60000)%1000)*100000;
+        time.nanosecond = (((msSinceMidnight%3600000)%60000)%1000)*1000000;
         time.code.second = msSinceMidnight/1000;
         time.code.nanosecond = time.nanosecond;
 
         baro.read();
 
         static unsigned long lastPropSample = 0;
-        if ((millis() - lastPropSample) >= 1.0/PROP_SENSOR_SAMPLE_RATE) {
+        if ((millis() - lastPropSample) >= (1000.0/(PROP_SENSOR_SAMPLE_RATE*4.0))) {
+            if (DEBUG) {
+                // Serial.println("Reading Prop");
+            }
             lastPropSample = millis();
-            prop.read();
+            static int channelSelect = 0;
+            prop.readChannel((channelSelect++)%4);
         }
         return true;
     }

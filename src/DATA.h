@@ -49,6 +49,7 @@ enum dataListString {
     PRESSURE, 
     MIX_VALUES,                 //dir, acc, dep
     OUTPUT_VALUES,               //l, r, x1, x2
+    PROP_VALUES,
     BAT_VALUES,
 };
 

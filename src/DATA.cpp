@@ -59,72 +59,72 @@ void dataClass::send(sysStatus sysIn) {
 
   // valves states
   packetToSend.engine_state.pressurize = sysIn.out.pressurizer == PRESSURIZER_OPEN; // NO Normally Open
-  packetToSend.engine_state.servo_N2O = sysIn.out.servoN2O == SERVO_N2O_OPEN;       // NO
-  packetToSend.engine_state.servo_fuel = sysIn.out.servoFuel == SERVO_FUEL_OPEN;    // NO
+  packetToSend.engine_state.servo_N2O = (sysIn.out.servoN2O>1500)?1:0;       // NO
+  packetToSend.engine_state.servo_fuel = (sysIn.out.servoFuel>1500)?1:0;    // NO
   packetToSend.engine_state.vent_N2O = sysIn.out.ventN2O == VENT_N2O_CLOSED;        // NC Normally Close
   packetToSend.engine_state.vent_fuel = sysIn.out.ventFuel == VENT_FUEL_CLOSED;     // NC 
 
-  com.sendTelemetry(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packetToSend, sizeof(packetToSend));
+  com.sendTelemetry(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packetToSend, av_downlink_size);
 }
 
 void dataClass::save(sysStatus sysIn) {
-  if (sysIn.initialised) {
-    if(firstTimeSave) {
-      int sdNameFile;
+  // if (sysIn.initialised) {
+  //   if(firstTimeSave) {
+  //     int sdNameFile;
 
-      year = sen.get().time.year;
-      month = sen.get().time.month;
-      day = sen.get().time.day;
-      hour = sen.get().time.hour;
-      minute = sen.get().time.minute;
-      second = sen.get().time.second;
+  //     year = sen.get().time.year;
+  //     month = sen.get().time.month;
+  //     day = sen.get().time.day;
+  //     hour = sen.get().time.hour;
+  //     minute = sen.get().time.minute;
+  //     second = sen.get().time.second;
 
-      do {
-        static unsigned trialNumber = 0;
-        second = (second+trialNumber)%60;
-        minute = (minute+trialNumber/60);
-        sdNameFile = day*1000000 + hour*10000 + minute*100 + second;
-        sprintf(namebuff, "%d.txt", sdNameFile);
-        sprintf(namebuffLowRate, "%dLR.txt", sdNameFile);
-        trialNumber++;
-      } while (SD.exists(namebuff));
+  //     do {
+  //       static unsigned trialNumber = 0;
+  //       second = (second+trialNumber)%60;
+  //       minute = (minute+trialNumber/60);
+  //       sdNameFile = day*1000000 + hour*10000 + minute*100 + second;
+  //       sprintf(namebuff, "%d.txt", sdNameFile);
+  //       sprintf(namebuffLowRate, "%dLR.txt", sdNameFile);
+  //       trialNumber++;
+  //     } while (SD.exists(namebuff));
 
-      SdFile::dateTimeCallback(dateTime);
-      dataFile = SD.open(namebuff, FILE_WRITE);
-      if (dataFile) { 
-        dataFile.println(printStarterString());
-      }
-      dataFile.close();
+  //     SdFile::dateTimeCallback(dateTime);
+  //     dataFile = SD.open(namebuff, FILE_WRITE);
+  //     if (dataFile) { 
+  //       dataFile.println(printStarterString());
+  //     }
+  //     dataFile.close();
 
-      SdFile::dateTimeCallback(dateTime);
-      dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
-      if (dataFileLowRate) {
-        dataFileLowRate.println(printStarterString());
-      }
-      dataFileLowRate.close();
-      firstTimeSave = false;
-    }
+  //     SdFile::dateTimeCallback(dateTime);
+  //     dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
+  //     if (dataFileLowRate) {
+  //       dataFileLowRate.println(printStarterString());
+  //     }
+  //     dataFileLowRate.close();
+  //     firstTimeSave = false;
+  //   }
 
-    SdFile::dateTimeCallback(dateTime);
-    dataFile = SD.open(namebuff, FILE_WRITE);
-    if (dataFile) { 
-      dataFile.println(print(sysIn)); 
-    }
-    dataFile.close(); 
+  //   SdFile::dateTimeCallback(dateTime);
+  //   dataFile = SD.open(namebuff, FILE_WRITE);
+  //   if (dataFile) { 
+  //     dataFile.println(print(sysIn)); 
+  //   }
+  //   dataFile.close(); 
 
-    if (LOW_RATE) {
-      static timeCode lastTime;
-      if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/LOW_RATE_RATE)) {
-        lastTime = sen.get().time.code;
-        SdFile::dateTimeCallback(dateTime);
-        dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
-        if (dataFileLowRate) { 
-          dataFileLowRate.println(print(sysIn)); 
-        }
-        dataFileLowRate.close(); 
-      }
-    }
-  }
+  //   if (LOW_RATE) {
+  //     static timeCode lastTime;
+  //     if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/LOW_RATE_RATE)) {
+  //       lastTime = sen.get().time.code;
+  //       SdFile::dateTimeCallback(dateTime);
+  //       dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
+  //       if (dataFileLowRate) { 
+  //         dataFileLowRate.println(print(sysIn)); 
+  //       }
+  //       dataFileLowRate.close(); 
+  //     }
+  //   }
+  // }
 
   if(TLM_MONITOR) { 
     String tlmString;
@@ -136,6 +136,9 @@ void dataClass::save(sysStatus sysIn) {
     static timeCode lastTime;
     if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/(TLM_MAIN_RATE))) {
       lastTime = sen.get().time.code;
+      if (DEBUG) {
+        // Serial.println("Sending Telemetry");
+      }
       send(sysIn);
     }
   }
@@ -216,6 +219,9 @@ String dataClass::printStarterString() {
       break;
       case OUTPUT_VALUES:
         output += "SOL1_OUT, SOL2_OUT, SOL3_OUT, SOL4_OUT, SER1_OUT, SER2_OUT, IGN_OUT, BUZ_OUT";
+      break;
+      case PROP_VALUES:
+        output += "N2O_PRESS, FUEL_PRESS, CHAM_PRESS, TANK_TEMP";
       break;
       case BAT_VALUES:
         output += "BAT_VOLT, BAT_CURR";
@@ -332,6 +338,12 @@ String dataClass::print(sysStatus sysIn) {
         output += String(sysIn.out.ignitor) + ",";
         output += String(sysIn.out.buzzer);
       break;
+      case PROP_VALUES:
+        output += String(sen.get().prop.pressureN2O) + ",";
+        output += String(sen.get().prop.pressureFuel) + ",";
+        output += String(sen.get().prop.pressureChamber) + ",";
+        output += String(sen.get().prop.temperatureN2O);
+      break;
       case BAT_VALUES:
         output += String(bat.get().voltage) + ",";
         output += String(bat.get().current);
@@ -344,16 +356,16 @@ String dataClass::print(sysStatus sysIn) {
 }
 
 batClass::batClass() 
-  :voltage(16.4), current(0), pinVoltage(BAT_PIN)
+  :voltage(16.4), current(0) // , pinVoltage()
 {
-    pinMode(pinVoltage, INPUT);
-    analogReadResolution(12); 
+    // pinMode(pinVoltage, INPUT);
+    // analogReadResolution(12); 
 }
 
 batStatus batClass::update() {
     batStatus batOut;
     //voltage = analogRead(pinVoltage)/222.4539;
-    voltage = analogRead(pinVoltage)/112.1124;
+    // voltage = analogRead(pinVoltage)/112.1124;
     current = 0;
     batOut.voltage = voltage;
     batOut.current = current;
