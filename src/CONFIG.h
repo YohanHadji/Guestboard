@@ -66,8 +66,8 @@
 
 // #define BAT_PIN             A0
 
-// #define LED_A_PIN           3 
-// #define LED_B_PIN           4
+#define LED_A_PIN           24
+#define LED_B_PIN           25
 
 // LOGIC LEVELS 
 #define VENT_N2O_OPEN       LOW
