@@ -66,6 +66,7 @@ struct senStatus {
   timeStruct time;
   timeStruct externalTime;
   gpsCoord position;
+  gpsCoord positionAux;
   xyzCoord speed; 
   double twoDSpeed;
   double threeDSpeed;
@@ -102,9 +103,11 @@ class senClass {
     // GLOBAL ESTIMATOR VALUES // 
     timeStruct time;
     gpsCoord position;
+    gpsCoord positionAux;
     xyzCoord speed;
     rpyCoord attitude;
     gpsStatus gps;
+    gpsStatus gpsAuxStatus;
     double course;
     bool updated;
     bool valid;
@@ -113,8 +116,8 @@ class senClass {
     // RAW SENSOR VALUES // 
     barClass baro;
     proClass prop;
-    TinyGPSPlus gpsMain;
-    TinyGPSPlus gpsAux;
+    SFE_UBLOX_GNSS_SERIAL gpsMain; 
+    SFE_UBLOX_GNSS_SERIAL gpsAux;
 
     elapsedMillis msSinceMidnight;
 };

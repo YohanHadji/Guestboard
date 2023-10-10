@@ -12,8 +12,8 @@ dataListString list1[] = {TIME_CODE, FLIGHT_MODE, PROP_VALUES,
                           
 int len = sizeof(list1)/sizeof(list1[0]);
 
-Adafruit_NeoPixel ledA(1, LED_A_PIN, NEO_GRB + NEO_KHZ800); // 1 led
-Adafruit_NeoPixel ledB(1, LED_B_PIN, NEO_GRB + NEO_KHZ800); // 1 led
+// Adafruit_NeoPixel ledA(1, LED_A_PIN, NEO_GRB + NEO_KHZ800); // 1 led
+// Adafruit_NeoPixel ledB(1, LED_B_PIN, NEO_GRB + NEO_KHZ800); // 1 led
 
 // uav, nordend is the main object of the code, everything is stored in this object. 
 static uav nordend(list1, len);
@@ -35,17 +35,17 @@ void setup() {
   nordend.data.begin();
 
 
-  { 
-    ledA.begin();
-    ledA.rainbow(10);
-    ledA.show();
-  }
+  // { 
+  //   ledA.begin();
+  //   ledA.rainbow(10);
+  //   ledA.show();
+  // }
 
-  { 
-    ledB.begin();
-    ledB.rainbow(10);
-    ledB.show();
-  }
+  // { 
+  //   ledB.begin();
+  //   ledB.rainbow(10);
+  //   ledB.show();
+  // }
 
 }
 
@@ -64,11 +64,5 @@ void loop() {
   }
   // Serial.println("E");
   nordend.update();
-  // Serial.println("F");
-  ledB.rainbow(10);
-  // ledB.show();
-
-  ledA.rainbow(10);
-  // ledA.show();
 }
 

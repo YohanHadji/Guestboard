@@ -43,12 +43,20 @@ void dataClass::send(sysStatus sysIn) {
 
   av_downlink_t packetToSend;
 
+  packetToSend.timestamp = senIn.time.hour*3600000+senIn.time.minute*60000+senIn.time.second*1000+senIn.time.nanosecond/1000000.0;
+
   packetToSend.timestamp = senIn.msSinceMidnight;
   packetToSend.av_state = sysIn.flightMode;
 
   packetToSend.gnss_lat = senIn.position.lat;
   packetToSend.gnss_lon = senIn.position.lng;
   packetToSend.gnss_alt = senIn.position.alt;
+
+  packetToSend.gnss_lat_r = senIn.positionAux.lat;
+  packetToSend.gnss_lon_r = senIn.positionAux.lng;
+  packetToSend.gnss_alt_r = senIn.positionAux.alt;
+
+  packetToSend.gnss_vertical_speed = senIn.speed.z;
 
   // packetToSend.positionAge = senIn.age;
 

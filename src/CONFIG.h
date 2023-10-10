@@ -3,7 +3,7 @@
 
 //---------- CONFIG ----------//
 
-#define DEBUG           true
+#define DEBUG           false
 
 #define TLM_MONITOR     true // Show telemetry on serial monitor 
 
@@ -12,12 +12,12 @@
 #define PROP_SENSOR_SAMPLE_RATE 1.0 // Propulsion sensor sample rate (in Hz)
 
 #define TLM_MAIN        true  // Send telemetry on main telem port 
-#define TLM_MAIN_RATE   1.0    // Rate of telemetry sent to radiosonde (in Hz)
+#define TLM_MAIN_RATE   2.0    // Rate of telemetry sent to radiosonde (in Hz)
 
-#define HIGH_RATE       true    // High rate datalogging 
+#define HIGH_RATE       false    // High rate datalogging 
 #define HIGH_RATE_RATE  20.0    // Rate of high rate saving (in Hz)
 
-#define LOW_RATE        true    // Additional low rate saving on a second file 
+#define LOW_RATE        false    // Additional low rate saving on a second file 
 #define LOW_RATE_RATE   1.0     // Rate of low rate saving (in Hz)
 
 #define DEP_MODE            1    // If 0 = Timer, 1 = Timer AND Altitude used to deploy. So will wait minimum X seconds and then will wait for good altitude.
@@ -35,10 +35,10 @@
 #define VDOWN           -2.5    // m/s
 
 // PORT WIRING
-#define GPS_MAIN_PORT Serial3
+#define GPS_MAIN_PORT Serial5
 #define GPS_MAIN_BAUD 115200
 
-#define GPS_AUX_PORT Serial3
+#define GPS_AUX_PORT Serial8
 #define GPS_AUX_BAUD 115200
 
 #define PROPSENSOR_UP_I2C_PORT Wire
