@@ -7,7 +7,7 @@
 //                           POSITION_VALUES, ATTITUDE_VALUES, SPEED_VALUES, COURSE, TEMPERATURE, PRESSURE, 
 //                           OUTPUT_VALUES}; 
 
-dataListString list1[] = {TIME_CODE, FLIGHT_MODE, PROP_VALUES, 
+dataListString list1[] = {TIME_CODE, FLIGHT_MODE, PROP_VALUES, POSITION_VALUES, SPEED_VALUES,
                           OUTPUT_VALUES}; 
                           
 int len = sizeof(list1)/sizeof(list1[0]);
@@ -30,6 +30,10 @@ void setup() {
   nordend.data.com.begin();
 
   if (SD.begin(chipSelect)) {
+    nordend.data.setSDIsPresent();
+  }
+  else {
+    nordend.data.setSDIsNotPresent();
   }
   // Must be called after SD.begin();
   nordend.data.begin();
@@ -47,22 +51,40 @@ void setup() {
   //   ledB.show();
   // }
 
+  pinMode(CAM_TOP_PIN, OUTPUT);
+  digitalWrite(CAM_TOP_PIN, HIGH);
+  delay(10000);
+  digitalWrite(CAM_TOP_PIN, LOW);
+  delay(200);
+  digitalWrite(CAM_TOP_PIN, HIGH);
+
 }
 
 
 void loop() {
   // The condition is true if the sensor has been updated since the last time we asked for it
-  // Serial.println("A");
+
   if (nordend.data.update()) {
-    // Serial.println("B");
+    // static unsigned counter = 0;
+    // static unsigned lastCounter = 0;
+    // if (counter-lastCounter>100) {
+    //   lastCounter = counter;
+    // Serial.println("After Update" + String(counter++));
+    // }
+    // else {
+    //   counter ++;
+    // }
     // .compute() will updated every single "action" variable in the uav object
+    // Serial.println("Before Compute");
     nordend.compute();
-    // Serial.println("C");
+    // Serial.println("After Compute");
+    // Serial.println("Before Ouput");
     // .output() will output the updated action dataset on the servos, led, buzzer, etc. 
     nordend.output();
-    // Serial.println("D");
+    // Serial.println("After Output");
   }
-  // Serial.println("E");
   nordend.update();
+  // Serial.println("After updated");
+  delayMicroseconds(500);
 }
 

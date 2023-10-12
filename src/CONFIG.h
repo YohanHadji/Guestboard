@@ -3,18 +3,19 @@
 
 //---------- CONFIG ----------//
 
-#define DEBUG           false
+#define DEBUG           true
 
-#define TLM_MONITOR     true // Show telemetry on serial monitor 
+#define TLM_MONITOR     false // Show telemetry on serial monitor 
 
 #define SENSOR_UPDATE_RATE 1000.0 // Sensor update rate (in Hz)
 
 #define PROP_SENSOR_SAMPLE_RATE 1.0 // Propulsion sensor sample rate (in Hz)
 
 #define TLM_MAIN        true  // Send telemetry on main telem port 
-#define TLM_MAIN_RATE   2.0    // Rate of telemetry sent to radiosonde (in Hz)
+#define TLM_MAIN_RATE   1.0    // Rate of telemetry sent to radiosonde (in Hz)
+#define MIN_PACKET_TIME 500
 
-#define HIGH_RATE       false    // High rate datalogging 
+#define HIGH_RATE       true    // High rate datalogging 
 #define HIGH_RATE_RATE  20.0    // Rate of high rate saving (in Hz)
 
 #define LOW_RATE        false    // Additional low rate saving on a second file 
@@ -63,6 +64,8 @@
 
 #define IGNITOR_PIN         6
 #define BUZZER_PIN          7
+
+#define CAM_TOP_PIN         29
 
 // #define BAT_PIN             A0
 

@@ -31,6 +31,9 @@ void uav::output() {
   if (HIGH_RATE) {
     // Serial.println(timeDiff(sys.get().time, lastSave));
     if (timeDiff(sys.get().time, lastSave) >= 1.0/HIGH_RATE_RATE) {
+      if(DEBUG) {
+        // Serial.println("Saving data loop");
+      }
       data.save(sys.get());
       lastSave = sys.get().time;
     }

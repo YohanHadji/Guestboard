@@ -53,7 +53,11 @@ void proClass::readChannel(int channel) {
         break;
 
         case 2:
-            temperatureN2O = adcDown.analogRead(0, gain, bitDepth);
+        {
+            float voltageMeasured = adcDown.analogRead(0, gain, bitDepth);
+            // float resistanceMeasured = 5100.0*voltageMeasured/(5000.0-voltageMeasured);
+            temperatureN2O = -125+(-0.282*voltageMeasured)+(0.00215*voltageMeasured*voltageMeasured);
+        }
         break;
 
         case 3:

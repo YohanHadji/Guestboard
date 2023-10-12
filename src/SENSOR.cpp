@@ -4,8 +4,7 @@ bool senClass::update() {
     // Collect data from all sensors and return true if some data has been updated
 
     bool positionUpdated = false;
-    if (gpsMain.getPVT() == true) {
-        unsigned long startOfFunc = micros();
+    if (gpsMain.getPVT() == true and gpsMain.getTimeValid()) {
         positionUpdated = true;
         if (gpsMain.getGnssFixOk() == true) {
             static float lastAltitude = position.alt;
@@ -16,6 +15,7 @@ bool senClass::update() {
             position.lat = gpsMain.getLatitude()/10000000.0;
             position.lng = gpsMain.getLongitude()/10000000.0;
             position.alt = gpsMain.getAltitudeMSL()/1000.0;
+
             // TODO: Verify that this way to note the time is correct
             // It might be jumping a bit due to the delay to transmit 
             // one full NMEA message. In that case we would only note time once
@@ -26,9 +26,12 @@ bool senClass::update() {
             time.second = gpsMain.getSecond();
             time.nanosecond = gpsMain.getNanosecond();
 
+            // Serial.println("Updating the time with the GPS");
+
             static bool timeInitialised = false;
 
             if (!timeInitialised) {
+                timeInitialised = true;
                 msSinceMidnight = time.hour*3600000+time.minute*60000+time.second*1000+time.nanosecond/1000000;
             }
 
@@ -37,25 +40,17 @@ bool senClass::update() {
             //gps.hdop = gpsMain.getHorizontalDOP();
             gps.isValid = gpsMain.getGnssFixOk();
         }
-        else if (gpsAux.getGnssFixOk() == true) {
-            // if (DEBUG) {
-            //     Serial.println("Only GPS Aux is valid");
-            // }
-            // position.lat = gpsAux.location.lat();
-            // position.lng = gpsAux.location.lng();
-            // position.alt = gpsAux.altitude.meters();
-            // // TODO: Verify that this way to note the time is correct
-            // // It might be jumping a bit due to the delay to transmit 
-            // // one full NMEA message. In that case we would only note time once
-            // // at initialisation for example and then use elapsed ms to know the time
-            // msSinceMidnight = gpsAux.time.value()*10.0+gpsAux.time.age();
-            // time.isValid = gpsAux.time.isValid();
-            // // gps.fixType = gpsAux.fixType();
-            // gps.hdop = gpsAux.hdop.value();
-            // gps.satNumber= gpsAux.satellites.value();
-            // gps.isValid = gpsAux.location.isValid();
+    }
+
+    if (gpsAux.getPVT() == true and gpsAux.getTimeValid()) {
+        if (gpsAux.getGnssFixOk() == true) {
+
+            positionAux.lat = gpsMain.getLatitude()/10000000.0;
+            positionAux.lng = gpsMain.getLongitude()/10000000.0;
+            positionAux.alt = gpsMain.getAltitudeMSL()/1000.0;
         }
     }
+    
 
     static unsigned long lastUpdate = 0;
     if (((millis() - lastUpdate) >= (1000.0/SENSOR_UPDATE_RATE))) {   // or positionUpdated) {
@@ -74,6 +69,8 @@ bool senClass::update() {
         time.nanosecond = (((msSinceMidnight%3600000)%60000)%1000)*1000000;
         time.code.second = msSinceMidnight/1000;
         time.code.nanosecond = time.nanosecond;
+
+        // Serial.println("Updating the time with the internal refernce");
 
         baro.read();
 
@@ -102,15 +99,17 @@ void senClass::begin(senSettings settings) {
     Serial.begin(115200);
 
     GPS_MAIN_PORT.begin(GPS_MAIN_BAUD);
-    while (gpsMain.begin(GPS_MAIN_PORT) == false) {
+    int counterMain = 0;
+    while (gpsMain.begin(GPS_MAIN_PORT) == false and counterMain<5) {
         if (DEBUG) {
             Serial.println(F("u-blox Main GNSS not detected. Retrying..."));
         }
-        delay(100);
+        counterMain++;
+        delay(1000);
     }
     gpsMain.setUART1Output(COM_TYPE_UBX);
     gpsMain.setDynamicModel(DYN_MODEL_AIRBORNE4g);
-    gpsMain.setMeasurementRate(500);
+    gpsMain.setMeasurementRate(100);
     gpsMain.setNavigationRate(1); 
     gpsMain.setAutoPVT(true);
     gpsMain.setSerialRate(115200);
@@ -119,15 +118,17 @@ void senClass::begin(senSettings settings) {
     GPS_MAIN_PORT.begin(115200);
 
     GPS_AUX_PORT.begin(GPS_AUX_BAUD);
-    while (gpsAux.begin(GPS_AUX_PORT) == false) {
+    int counterAux = 0;
+    while (gpsAux.begin(GPS_AUX_PORT) == false and counterAux<5) {
         if (DEBUG) {
             Serial.println(F("u-blox Aux GNSS not detected. Retrying..."));
         }
-        delay(100);
+        counterAux ++;
+        delay(1000);
     }
     gpsAux.setUART1Output(COM_TYPE_UBX);
     gpsAux.setDynamicModel(DYN_MODEL_AIRBORNE4g);
-    gpsAux.setMeasurementRate(500);
+    gpsAux.setMeasurementRate(100);
     gpsAux.setNavigationRate(1);
     gpsAux.setAutoPVT(true);
     gpsAux.setSerialRate(115200);
@@ -157,7 +158,7 @@ bool senClass::isValid() {
 senStatus senClass::get() {
     senStatus senOut;
     senOut.position = position;
-    senOut.position = positionAux;
+    senOut.positionAux = positionAux;
     senOut.attitude = attitude;
     senOut.speed = speed;
     senOut.time = time;

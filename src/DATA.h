@@ -65,6 +65,8 @@ class dataClass {
     String print(sysStatus);
     String printStarterString();
     bool isUpdated();
+    void setSDIsPresent();
+    void setSDIsNotPresent();
 
     senClass sen;
     comClass com;
@@ -83,6 +85,7 @@ class dataClass {
     void int32ToByte(int32_t intIn, byte *b);
     void int16ToByte(int16_t intIn, byte *b);
     void int8ToByte(int8_t intIn, byte *b); 
+    bool sdIsPresent;
 };
 
 #endif

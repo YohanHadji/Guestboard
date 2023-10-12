@@ -3,7 +3,7 @@
 static int year, month, day, hour, minute, second;
 
 dataClass::dataClass(dataListString listIn[30], int len)
-: firstTimeSave(true)
+: firstTimeSave(true), sdIsPresent(TRNG_DEFAULT_FREQUENCY_MAXIMUM)
 {
   for(int i(0); i < len; ++i) {
     list[i] = listIn[i];
@@ -38,101 +38,133 @@ bool dataClass::update() {
 
 void dataClass::send(sysStatus sysIn) {
 
-  senStatus senIn;
-  senIn = sen.get();
+  static unsigned long lastPacketSent = millis();
 
-  av_downlink_t packetToSend;
+  if (millis()-lastPacketSent>MIN_PACKET_TIME) {
 
-  packetToSend.timestamp = senIn.time.hour*3600000+senIn.time.minute*60000+senIn.time.second*1000+senIn.time.nanosecond/1000000.0;
+    lastPacketSent = millis();
+    
+    senStatus senIn;
+    senIn = sen.get();
 
-  packetToSend.timestamp = senIn.msSinceMidnight;
-  packetToSend.av_state = sysIn.flightMode;
+    av_downlink_t packetToSend;
 
-  packetToSend.gnss_lat = senIn.position.lat;
-  packetToSend.gnss_lon = senIn.position.lng;
-  packetToSend.gnss_alt = senIn.position.alt;
+    packetToSend.timestamp = senIn.time.hour*3600000+senIn.time.minute*60000+senIn.time.second*1000+senIn.time.nanosecond/1000000.0;
 
-  packetToSend.gnss_lat_r = senIn.positionAux.lat;
-  packetToSend.gnss_lon_r = senIn.positionAux.lng;
-  packetToSend.gnss_alt_r = senIn.positionAux.alt;
+    packetToSend.timestamp = senIn.msSinceMidnight;
+    packetToSend.av_state = sysIn.flightMode;
 
-  packetToSend.gnss_vertical_speed = senIn.speed.z;
+    packetToSend.gnss_lat = senIn.position.lat;
+    packetToSend.gnss_lon = senIn.position.lng;
+    packetToSend.gnss_alt = senIn.position.alt;
 
-  // packetToSend.positionAge = senIn.age;
+    packetToSend.gnss_lat_r = senIn.positionAux.lat;
+    packetToSend.gnss_lon_r = senIn.positionAux.lng;
+    packetToSend.gnss_alt_r = senIn.positionAux.alt;
 
-  packetToSend.N2O_pressure = senIn.prop.pressureN2O;
-  packetToSend.fuel_pressure = senIn.prop.pressureFuel;
-  packetToSend.chamber_pressure = senIn.prop.pressureChamber;
-  packetToSend.tank_temp = senIn.prop.temperatureN2O;
+    packetToSend.gnss_vertical_speed = senIn.speed.z;
 
-  // valves states
-  packetToSend.engine_state.pressurize = sysIn.out.pressurizer == PRESSURIZER_OPEN; // NO Normally Open
-  packetToSend.engine_state.servo_N2O = (sysIn.out.servoN2O>1500)?1:0;       // NO
-  packetToSend.engine_state.servo_fuel = (sysIn.out.servoFuel>1500)?1:0;    // NO
-  packetToSend.engine_state.vent_N2O = sysIn.out.ventN2O == VENT_N2O_CLOSED;        // NC Normally Close
-  packetToSend.engine_state.vent_fuel = sysIn.out.ventFuel == VENT_FUEL_CLOSED;     // NC 
+    // packetToSend.positionAge = senIn.age;
 
-  com.sendTelemetry(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packetToSend, av_downlink_size);
+    packetToSend.N2O_pressure = senIn.prop.pressureN2O;
+    packetToSend.fuel_pressure = senIn.prop.pressureFuel;
+    packetToSend.chamber_pressure = senIn.prop.pressureChamber;
+    packetToSend.tank_temp = senIn.prop.temperatureN2O;
+
+    // valves states
+    packetToSend.engine_state.pressurize = sysIn.out.pressurizer == PRESSURIZER_OPEN; // NO Normally Open
+    packetToSend.engine_state.servo_N2O = (sysIn.out.servoN2O>1500)?1:0;       // NO
+    packetToSend.engine_state.servo_fuel = (sysIn.out.servoFuel>1500)?1:0;    // NO
+    packetToSend.engine_state.vent_N2O = sysIn.out.ventN2O == VENT_N2O_CLOSED;        // NC Normally Close
+    packetToSend.engine_state.vent_fuel = sysIn.out.ventFuel == VENT_FUEL_CLOSED;     // NC 
+
+    com.sendTelemetry(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packetToSend, av_downlink_size);
+  }
 }
 
 void dataClass::save(sysStatus sysIn) {
-  // if (sysIn.initialised) {
-  //   if(firstTimeSave) {
-  //     int sdNameFile;
 
-  //     year = sen.get().time.year;
-  //     month = sen.get().time.month;
-  //     day = sen.get().time.day;
-  //     hour = sen.get().time.hour;
-  //     minute = sen.get().time.minute;
-  //     second = sen.get().time.second;
+  bool loggingPermitted = true;
 
-  //     do {
-  //       static unsigned trialNumber = 0;
-  //       second = (second+trialNumber)%60;
-  //       minute = (minute+trialNumber/60);
-  //       sdNameFile = day*1000000 + hour*10000 + minute*100 + second;
-  //       sprintf(namebuff, "%d.txt", sdNameFile);
-  //       sprintf(namebuffLowRate, "%dLR.txt", sdNameFile);
-  //       trialNumber++;
-  //     } while (SD.exists(namebuff));
+  if (sysIn.flightMode == FLIGHTMODE::IGNITER_MODE or 
+      sysIn.flightMode == FLIGHTMODE::IGNITION_MODE) {
 
-  //     SdFile::dateTimeCallback(dateTime);
-  //     dataFile = SD.open(namebuff, FILE_WRITE);
-  //     if (dataFile) { 
-  //       dataFile.println(printStarterString());
-  //     }
-  //     dataFile.close();
+      loggingPermitted = false;
+  }
 
-  //     SdFile::dateTimeCallback(dateTime);
-  //     dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
-  //     if (dataFileLowRate) {
-  //       dataFileLowRate.println(printStarterString());
-  //     }
-  //     dataFileLowRate.close();
-  //     firstTimeSave = false;
-  //   }
+  if (sysIn.initialised and sdIsPresent and loggingPermitted) {
+    unsigned startOfSave = millis();
+    if(firstTimeSave) {
+      int sdNameFile;
 
-  //   SdFile::dateTimeCallback(dateTime);
-  //   dataFile = SD.open(namebuff, FILE_WRITE);
-  //   if (dataFile) { 
-  //     dataFile.println(print(sysIn)); 
-  //   }
-  //   dataFile.close(); 
+      year = sen.get().time.year;
+      month = sen.get().time.month;
+      day = sen.get().time.day;
+      hour = sen.get().time.hour;
+      minute = sen.get().time.minute;
+      second = sen.get().time.second;
 
-  //   if (LOW_RATE) {
-  //     static timeCode lastTime;
-  //     if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/LOW_RATE_RATE)) {
-  //       lastTime = sen.get().time.code;
-  //       SdFile::dateTimeCallback(dateTime);
-  //       dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
-  //       if (dataFileLowRate) { 
-  //         dataFileLowRate.println(print(sysIn)); 
-  //       }
-  //       dataFileLowRate.close(); 
-  //     }
-  //   }
-  // }
+      bool sdFail = false;
+
+      do {
+        static unsigned trialNumber = 0;
+        second = (second+trialNumber)%60;
+        minute = (minute+trialNumber/60);
+        sdNameFile = day*1000000 + hour*10000 + minute*100 + second;
+        sprintf(namebuff, "%d.txt", sdNameFile);
+        sprintf(namebuffLowRate, "%dLR.txt", sdNameFile);
+        trialNumber++;
+        if ((millis()-startOfSave)>10) {
+          sdFail = true;
+        }
+      } while (SD.exists(namebuff) and !sdFail);
+
+      SdFile::dateTimeCallback(dateTime);
+      dataFile = SD.open(namebuff, FILE_WRITE);
+      if (dataFile) { 
+        dataFile.println(printStarterString());
+      }
+      dataFile.close();
+
+      SdFile::dateTimeCallback(dateTime);
+      dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
+      if (dataFileLowRate) {
+        dataFileLowRate.println(printStarterString());
+      }
+      dataFileLowRate.close();
+      firstTimeSave = false;
+    }
+
+    if ((millis()-startOfSave)>60) {
+      sdIsPresent = false;
+    }
+
+    if (sdIsPresent) {
+      SdFile::dateTimeCallback(dateTime);
+      dataFile = SD.open(namebuff, FILE_WRITE);
+      if (dataFile) { 
+        dataFile.println(print(sysIn)); 
+      }
+      dataFile.close(); 
+
+      if ((millis()-startOfSave)>60) {
+        sdIsPresent = false;
+      }
+
+      if (LOW_RATE) {
+        static timeCode lastTime;
+        if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/LOW_RATE_RATE)) {
+          lastTime = sen.get().time.code;
+          SdFile::dateTimeCallback(dateTime);
+          dataFileLowRate = SD.open(namebuffLowRate, FILE_WRITE);
+          if (dataFileLowRate) { 
+            dataFileLowRate.println(print(sysIn)); 
+          }
+          dataFileLowRate.close(); 
+        }
+      }
+    }
+  }
 
   if(TLM_MONITOR) { 
     String tlmString;
@@ -145,7 +177,7 @@ void dataClass::save(sysStatus sysIn) {
     if (sen.timeDiff(sen.get().time.code,lastTime)>=(1.0/(TLM_MAIN_RATE))) {
       lastTime = sen.get().time.code;
       if (DEBUG) {
-        // Serial.println("Sending Telemetry");
+        Serial.println("Sending Telemetry");
       }
       send(sysIn);
     }
@@ -205,7 +237,7 @@ String dataClass::printStarterString() {
         output += "SENSOR_VALID, GPS_MAIN_VALID, SAT_MAIN_NUMBER, GPS_AUX_VALID, SAT_AUX_NUMBER, TIME_VALID";
       break;
       case POSITION_VALUES:
-        output += "LATITUDE, LONGITUDE, ALTITUDE";
+        output += "LATITUDE, LONGITUDE, ALTITUDE, LATITUDE_AUX, LONGITUDE_AUX, ALTITUDE_AUX";
       break;
       case ATTITUDE_VALUES:
         output += "ROLL, PITCH, YAW";
@@ -298,7 +330,10 @@ String dataClass::print(sysStatus sysIn) {
       case POSITION_VALUES:
         output += String(sen.get().position.lat,5) + ",";
         output += String(sen.get().position.lng,5) + ",";
-        output += String(sen.get().position.alt);
+        output += String(sen.get().position.alt) + + ",";
+        output += String(sen.get().positionAux.lat,5) + ",";
+        output += String(sen.get().positionAux.lng,5) + ",";
+        output += String(sen.get().positionAux.alt);
       break;
       case ATTITUDE_VALUES:
         output += String(sen.get().attitude.roll) + ",";
@@ -436,4 +471,12 @@ void dataClass::int8ToByte(int8_t intIn, byte *b) {
   u.intData = intIn;
 
   b[0] = u.i[0];
+}
+
+void dataClass::setSDIsPresent() {
+  sdIsPresent = true;
+}
+
+void dataClass::setSDIsNotPresent() {
+  sdIsPresent = false;
 }

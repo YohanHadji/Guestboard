@@ -128,6 +128,8 @@ void comClass::sendTelemetry(uint8_t packetId, uint8_t *data, uint32_t len) {
   // Serial.print(" ");
   // Serial.println(packetToSend.engine_state.vent_fuel);
 
+  Serial.println("Sending that we are in mode: " + String(packetToSend.av_state));
+
   uint8_t *codedBuffer = LoRaCapsuleDownlink.encode(packetId, data, len);
   size_t codedLen = LoRaCapsuleDownlink.getCodedLen(len);
 
