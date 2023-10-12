@@ -260,7 +260,7 @@ mixStatus mixClass::mixShutdown(sysStatus sysIn) {
   mixOut.pressurizer  = PRESSURIZER_OPEN;
   mixOut.solenoid4    = SOLENOID4_CLOSED;
   mixOut.servoN2O     = SERVO_N2O_CLOSED;
-  mixOut.servoFuel    = SERVO_FUEL_CLOSED;
+  mixOut.servoFuel    = SERVO_FUEL_OPEN;
   mixOut.ignitor      = IGNITOR_INACTIVE;
   mixOut.buzzer       = !BUZZER_ACTIVE;
   return mixOut;
@@ -268,7 +268,14 @@ mixStatus mixClass::mixShutdown(sysStatus sysIn) {
 
 mixStatus mixClass::mixFlightAscent(sysStatus sysIn) {
   mixStatus mixOut({0, 0, 0, 0, 0, 0, 0, 0});
-  
+  mixOut.ventN2O      = VENT_N2O_OPEN;
+  mixOut.ventFuel     = VENT_FUEL_OPEN;
+  mixOut.pressurizer  = PRESSURIZER_OPEN;
+  mixOut.solenoid4    = SOLENOID4_CLOSED;
+  mixOut.servoN2O     = SERVO_N2O_CLOSED;
+  mixOut.servoFuel    = SERVO_FUEL_CLOSED;
+  mixOut.ignitor      = IGNITOR_INACTIVE;
+  mixOut.buzzer       = BUZZER_ACTIVE;
   return mixOut;
 }
 
