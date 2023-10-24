@@ -53,38 +53,28 @@ void setup() {
 
   pinMode(CAM_TOP_PIN, OUTPUT);
   digitalWrite(CAM_TOP_PIN, HIGH);
-  delay(10000);
-  digitalWrite(CAM_TOP_PIN, LOW);
-  delay(200);
-  digitalWrite(CAM_TOP_PIN, HIGH);
 
 }
 
 
 void loop() {
-  // The condition is true if the sensor has been updated since the last time we asked for it
 
+
+  // This was to trigger external camera recording after some time
+  if (millis()>30000 and millis()<31000) {
+    digitalWrite(CAM_TOP_PIN, LOW);
+  }
+  else {
+    digitalWrite(CAM_TOP_PIN, HIGH);
+  }
+
+  // The condition is true if the sensor has been updated since the last time we asked for it
   if (nordend.data.update()) {
-    // static unsigned counter = 0;
-    // static unsigned lastCounter = 0;
-    // if (counter-lastCounter>100) {
-    //   lastCounter = counter;
-    // Serial.println("After Update" + String(counter++));
-    // }
-    // else {
-    //   counter ++;
-    // }
-    // .compute() will updated every single "action" variable in the uav object
-    // Serial.println("Before Compute");
     nordend.compute();
-    // Serial.println("After Compute");
-    // Serial.println("Before Ouput");
     // .output() will output the updated action dataset on the servos, led, buzzer, etc. 
     nordend.output();
     // Serial.println("After Output");
   }
   nordend.update();
-  // Serial.println("After updated");
-  delayMicroseconds(500);
 }
 

@@ -98,14 +98,14 @@ senClass::senClass()
 void senClass::begin(senSettings settings) {
     Serial.begin(115200);
 
-    GPS_MAIN_PORT.begin(GPS_MAIN_BAUD);
+    GPS_MAIN_PORT.begin(9600);
     int counterMain = 0;
-    while (gpsMain.begin(GPS_MAIN_PORT) == false and counterMain<5) {
+    while (gpsMain.begin(GPS_MAIN_PORT) == false and counterMain<3) {
         if (DEBUG) {
             Serial.println(F("u-blox Main GNSS not detected. Retrying..."));
         }
         counterMain++;
-        delay(1000);
+        delay(100);
     }
     gpsMain.setUART1Output(COM_TYPE_UBX);
     gpsMain.setDynamicModel(DYN_MODEL_AIRBORNE4g);
@@ -117,14 +117,51 @@ void senClass::begin(senSettings settings) {
     GPS_MAIN_PORT.end();
     GPS_MAIN_PORT.begin(115200);
 
-    GPS_AUX_PORT.begin(GPS_AUX_BAUD);
+    counterMain = 0;
+    while (gpsMain.begin(GPS_MAIN_PORT) == false and counterMain<3) {
+        if (DEBUG) {
+            Serial.println(F("u-blox Main GNSS not detected. Retrying..."));
+        }
+        counterMain++;
+        delay(100);
+    }
+    gpsMain.setUART1Output(COM_TYPE_UBX);
+    gpsMain.setDynamicModel(DYN_MODEL_AIRBORNE4g);
+    gpsMain.setMeasurementRate(100);
+    gpsMain.setNavigationRate(1); 
+    gpsMain.setAutoPVT(true);
+    gpsMain.setSerialRate(115200);
+
+    GPS_MAIN_PORT.end();
+    GPS_MAIN_PORT.begin(115200);
+
+
+    GPS_AUX_PORT.begin(9600);
     int counterAux = 0;
-    while (gpsAux.begin(GPS_AUX_PORT) == false and counterAux<5) {
+    while (gpsAux.begin(GPS_AUX_PORT) == false and counterAux<3) {
         if (DEBUG) {
             Serial.println(F("u-blox Aux GNSS not detected. Retrying..."));
         }
         counterAux ++;
-        delay(1000);
+        delay(100);
+    }
+    gpsAux.setUART1Output(COM_TYPE_UBX);
+    gpsAux.setDynamicModel(DYN_MODEL_AIRBORNE4g);
+    gpsAux.setMeasurementRate(100);
+    gpsAux.setNavigationRate(1);
+    gpsAux.setAutoPVT(true);
+    gpsAux.setSerialRate(115200);
+
+    GPS_AUX_PORT.end();
+    GPS_AUX_PORT.begin(115200);
+
+    counterAux = 0;
+    while (gpsAux.begin(GPS_AUX_PORT) == false and counterAux<3) {
+        if (DEBUG) {
+            Serial.println(F("u-blox Aux GNSS not detected. Retrying..."));
+        }
+        counterAux ++;
+        delay(100);
     }
     gpsAux.setUART1Output(COM_TYPE_UBX);
     gpsAux.setDynamicModel(DYN_MODEL_AIRBORNE4g);

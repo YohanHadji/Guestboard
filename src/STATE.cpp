@@ -313,7 +313,7 @@ FLIGHTMODE uav::flightDescent() {
   }
   
   if (data.get().sen.speed.z > VDOWN) {
-    flightModeOut = FLIGHTMODE::ASCENT_MODE;
+    flightModeOut = FLIGHTMODE::READYSTEADY_MODE;
   }
 
   // We have two differents deployment mode, one using a target altitude, and one using a timer

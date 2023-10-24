@@ -101,10 +101,10 @@
 #define SERVO_FUEL_OPEN     2300
 
 // PROPULSION TIMING
-#define IGNITER_COUNTER     4.25
+#define IGNITER_COUNTER     2.75
 #define IGNITION_COUNTER    1.615
-#define THRUST_COUNTER      1.0
-#define SHUTDOWN_COUNTER    10.0
+#define THRUST_COUNTER      9.7
+#define SHUTDOWN_COUNTER    40.0 // Delay before venting vannes
 
 #define STEP1_DELAY_MS      265
 #define STEP2_DELAY_MS      350
